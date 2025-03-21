@@ -35,7 +35,7 @@ export default function AddListing() {
       <ContainerDiv isModalOpen={isModalOpen}>
         <GlobalStyle />
         <AddListingHeader>ლისტინგის დამატება</AddListingHeader>
-        <FormsDiv>
+        <FormsDiv onSubmit={handleSubmit(onSubmit)}>
           <DealTypeDiv>
             <Label>გარიგების ტიპი:</Label>
             <DealTypeOptions>
@@ -228,10 +228,6 @@ const TickImg = styled.img`
   height: 14px;
 `;
 
-// const SymbolsQuantity = styled.p
-//   font-size: 14px;
-//   color: gray;
-// ;
 const SymbolsQuantity = styled.p`
   font-size: 14px;
   color: gray;
@@ -245,7 +241,7 @@ const ContainerDiv = styled.div`
 `;
 const AddListingHeader = styled.h1``;
 
-const FormsDiv = styled.div`
+const FormsDiv = styled.form`
   width: 790px;
   padding: 20px;
   display: flex;

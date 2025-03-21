@@ -9,7 +9,7 @@ export const addListingSchema = yup.object().shape({
   image: yup
     .mixed()
     .required("ფოტოს ატვირთვა აუცილებელია")
-    .test("fileType", "ფორმატი უნდა იყოს: jpg, jpeg, png", (value) => {
+    .test("fileType", "ფოტოს ატვირთვა აუცილებელია", (value) => {
       return (
         value && ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
       );
