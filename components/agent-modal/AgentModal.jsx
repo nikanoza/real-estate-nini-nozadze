@@ -5,6 +5,7 @@ import GlobalStyle from "@/app/GlobalStyles";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { agentSchema } from "@/schemas/new-agent-schema"; 
+import { addAgent } from "@/services/agentService";
 
 export default function AgentModal({ onClose }) {
   const [image, setImage] = useState(null);
@@ -24,33 +25,68 @@ export default function AgentModal({ onClose }) {
     }
   };
 
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
+  const onSubmit = async (data) => {
+    console.log("Form Data:", data); 
+    if (!data.avatar || data.avatar.length === 0) {
+      alert("Please select an image!");
+      return;
+    }
+  
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("surname", data.surname);
+    formData.append("email", data.email);
+    formData.append("phone", data.phone);
+    formData.append("avatar", data.avatar[0]);  
+  
+    console.log("Submitting formData:", formData);  
+  
+    try {
+      const response = await addAgent(formData);
+      console.log("Agent added successfully:", response);
+      alert("Agent added successfully!");
+      onClose();
+    } catch (error) {
+      console.error("Error adding agent:", error);
+      alert("Failed to add agent.");
+    }
   };
-
+  
+  
+  console.log(errors)
   return (
     <>
       <GlobalStyle />
       <Backdrop>
         <ModalContainer>
           <Agents>აგენტის დამატება</Agents>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <form onSubmit={(e) => {
+    e.preventDefault();
+    handleSubmit(onSubmit)(e);
+  }}>
             <InputRow>
               <InputWrapper>
                 <Label>სახელი*</Label>
-                <Input {...register("firstName")} type="text" />
+                <Input {...register("name")} type="text" />
                 <Validation>
-                  <TickImg src="/tick.svg" />
-                  <span>{errors.firstName ? errors.firstName.message : "მინიმუმ ორი სიმბოლო"}</span>
+                {errors.name && <Error>{errors.name.message}</Error>}
+                  {!errors.name && (
+                    <ValidationWrapper>
+                    <TickImg src="/tick.svg" />
+                    <span>"მინიმუმ ორი სიმბოლო"</span>  </ValidationWrapper>)}
+                   
                 </Validation>
               </InputWrapper>
 
               <InputWrapper>
                 <Label>გვარი*</Label>
-                <Input {...register("lastName")} type="text" />
+                <Input {...register("surname")} type="text" />
                 <Validation>
-                  <TickImg src="/tick.svg" />
-                  <span>{errors.lastName ? errors.lastName.message : "მინიმუმ ორი სიმბოლო"}</span>
+                {errors.surname && <Error>{errors.surname.message}</Error>}
+                  {!errors.surname && (
+                    <ValidationWrapper>
+                    <TickImg src="/tick.svg" />
+                    <span>"მინიმუმ ორი სიმბოლო"</span>  </ValidationWrapper>)}
                 </Validation>
               </InputWrapper>
             </InputRow>
@@ -60,8 +96,12 @@ export default function AgentModal({ onClose }) {
                 <Label>ელ-ფოსტა*</Label>
                 <Input {...register("email")} type="email" />
                 <Validation>
-                  <TickImg src="/tick.svg" />
-                  <span>{errors.email ? errors.email.message : "გამოიყენეთ @redberry.ge ფოსტა"}</span>
+                  {errors.email && <Error>{errors.email.message}</Error>}
+                  {!errors.email && (
+                    <ValidationWrapper>
+                    <TickImg src="/tick.svg" />
+                    <span>"გამოიყენეთ @redberry.ge ფოსტა"</span>  </ValidationWrapper>)}
+                   
                 </Validation>
               </InputWrapper>
 
@@ -69,37 +109,60 @@ export default function AgentModal({ onClose }) {
                 <Label>ტელეფონის ნომერი*</Label>
                 <Input {...register("phone")} type="tel" />
                 <Validation>
-                  <TickImg src="/tick.svg" />
-                  <span>{errors.phone ? errors.phone.message : "მხოლოდ რიცხვები"}</span>
+                {errors.phone && <Error>{errors.phone.message}</Error>}
+                  {!errors.phone && (
+                    <ValidationWrapper>
+                    <TickImg src="/tick.svg" />
+                    <span>"მხოლოდ რიცხვები"</span>  </ValidationWrapper>)}
                 </Validation>
               </InputWrapper>
             </InputRow>
 
             <UploadContainer>
-              <UploadLabel>ატვირთეთ ფოტო*</UploadLabel>
-              <UploadBox onClick={() => document.getElementById("fileInput").click()}>
-                {image ? <UploadedImage src={image} alt="Uploaded" /> : <PlusIcon src="/plus-circle.svg" />}
-              </UploadBox>
-              <HiddenFileInput
-                id="fileInput"
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
-            </UploadContainer>
+    <UploadLabel>ატვირთეთ ფოტო*</UploadLabel>
+    <UploadBox onClick={() => document.getElementById("fileInput").click()}>
+      {image ? (
+        <UploadedImage src={image} alt="Uploaded" />
+      ) : (
+        <PlusIcon src="/plus-circle.svg" />
+      )}
+    </UploadBox>
+    <HiddenFileInput
+      id="fileInput"
+      type="file"
+      accept="image/*"
+      {...register("avatar")} 
+      onChange={handleImageUpload}
+    />
+    {errors.avatar && <Error>{errors.avatar.message}</Error>}
+  </UploadContainer>
 
             <ButtonRow>
-              <CancelButton onClick={onClose}>გაუქმება</CancelButton>
-              <AddButton type="submit">დაამატე აგენტი</AddButton>
+              <CancelButton type="button" onClick={onClose}>გაუქმება</CancelButton>
+              <AddButton type="submit"> დაამატე აგენტი</AddButton>
             </ButtonRow>
           </form>
         </ModalContainer>
       </Backdrop>
     </>
+   
   );
+  
 }
 
+const ValidationWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 5px;
+`;
 
+
+const Error = styled.p`
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+`;
 const Backdrop = styled.div`
   position: fixed;
   top: 0;

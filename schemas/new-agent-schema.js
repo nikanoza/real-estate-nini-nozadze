@@ -1,12 +1,12 @@
 import * as yup from "yup";
 
 export const agentSchema = yup.object().shape({
-  firstName: yup
+  name: yup
     .string()
     .min(2, "მინიმუმ ორი სიმბოლო")
     .required("სახელი აუცილებელია"),
 
-  lastName: yup
+  surname: yup
     .string()
     .min(2, "მინიმუმ ორი სიმბოლო")
     .required("გვარი აუცილებელია"),
@@ -25,10 +25,10 @@ export const agentSchema = yup.object().shape({
     )
     .required("ტელეფონის ნომერი აუცილებელია"),
 
-  image: yup
+  avatar: yup
     .mixed()
-    .required("ატვირთეთ ფოტო")
-    .test("fileSize", "ფაილის ზომა ძალიან დიდი არის", (value) => {
+    .required("ფოტოს ატვირთვა აუცილებელია")
+    .test("fileSize", "", (value) => {
       return value && value.size <= 5 * 1024 * 1024;
     }),
 });
