@@ -25,14 +25,15 @@ export default function AgentModal({ onClose }) {
     }
   };
 
+
+
   const onSubmit = async (data) => {
    const formData = new FormData();
     formData.append("name", data.name);
     formData.append("surname", data.surname);
     formData.append("email", data.email);
     formData.append("phone", data.phone);
-   formData.append("avatar", image )
-    console.log("Submitting formData:", formData);
+    formData.append("avatar", image);  
     try {
       const response = await addAgent(formData);
       console.log("Agent added successfully:", response);
@@ -131,7 +132,7 @@ export default function AgentModal({ onClose }) {
 
             <ButtonRow>
               <CancelButton type="button" onClick={onClose}>გაუქმება</CancelButton>
-              <AddButton type="submit"> დაამატე აგენტი</AddButton>
+              <AddButton type="submit" onClick={handleSubmit(onSubmit)}> დაამატე აგენტი</AddButton>
             </ButtonRow>
           </form>
         </ModalContainer>
