@@ -21,26 +21,18 @@ export default function AgentModal({ onClose }) {
   const handleImageUpload = (event) => {
     const file = event.target.files[0];
     if (file) {
-      setImage(URL.createObjectURL(file));
+      setImage(file); 
     }
   };
 
   const onSubmit = async (data) => {
-    console.log("Form Data:", data); 
-    if (!data.avatar || data.avatar.length === 0) {
-      alert("Please select an image!");
-      return;
-    }
-  
-    const formData = new FormData();
+   const formData = new FormData();
     formData.append("name", data.name);
     formData.append("surname", data.surname);
     formData.append("email", data.email);
     formData.append("phone", data.phone);
-    formData.append("avatar", data.avatar[0]);  
-  
-    console.log("Submitting formData:", formData);  
-  
+   formData.append("avatar", image )
+    console.log("Submitting formData:", formData);
     try {
       const response = await addAgent(formData);
       console.log("Agent added successfully:", response);
@@ -122,19 +114,19 @@ export default function AgentModal({ onClose }) {
     <UploadLabel>ატვირთეთ ფოტო*</UploadLabel>
     <UploadBox onClick={() => document.getElementById("fileInput").click()}>
       {image ? (
-        <UploadedImage src={image} alt="Uploaded" />
+        <UploadedImage src={URL.createObjectURL(image)} alt="Uploaded" />
       ) : (
         <PlusIcon src="/plus-circle.svg" />
       )}
-    </UploadBox>
-    <HiddenFileInput
+      <HiddenFileInput
       id="fileInput"
       type="file"
       accept="image/*"
-      {...register("avatar")} 
       onChange={handleImageUpload}
     />
     {errors.avatar && <Error>{errors.avatar.message}</Error>}
+    </UploadBox>
+    
   </UploadContainer>
 
             <ButtonRow>

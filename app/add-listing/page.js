@@ -9,6 +9,8 @@ import GlobalStyle from "../GlobalStyles";
 import AgentModal from "@/components/agent-modal/AgentModal";
 
 export default function AddListing() {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [picture, setPicture] = useState(null);
   const {
     register,
     handleSubmit,
@@ -16,10 +18,34 @@ export default function AddListing() {
   } = useForm({
     resolver: yupResolver(addListingSchema),
   });
-  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const onSubmit = (data) => {
-    console.log("Form Data:", data);
+  const handlePictureUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setPicture(file);
+    }
+  };
+
+  const onSubmit = async (data) => {
+    const formData = new FormData();
+
+    formData.append("address", data.address);
+    formData.append("region_id", data.region_id);
+    formData.append("city_id", data.city_id);
+    formData.append("zip_code", data.zip_code);
+    formData.append("price", data.price);
+    formData.append("area", data.area);
+    formData.append("bedrooms", data.bedrooms);
+    formData.append("description", data.description);
+    formData.append("is_rental", data.is_rental);
+    formData.append("agent_id", data.agent_id);
+    formData.append("image", picture);
+    try {
+      const response = await createRealEstateListing(formData);
+      console.log("Listing successfully created!", response);
+    } catch (err) {
+      console.error("Submission failed:", err);
+    }
   };
 
   const handleModalOpen = () => {
@@ -80,6 +106,7 @@ export default function AddListing() {
               <Select {...register("region")}>
                 <option value="">აირჩიეთ რეგიონი</option>
                 <option value="imereti">იმერეთი</option>
+                <option value="imereti">შიდა ქართლი</option>
                 <option value="samegrelo">სამეგრელო</option>
                 <option value="guria">გურია</option>
               </Select>
@@ -149,16 +176,22 @@ export default function AddListing() {
           </InputWrapper>
           <InputWrapper>
             <Label>ატვირთეთ ფოტო*</Label>
-            <ImageUploadDiv>
-              <PlusIcon
-                src="/plus-circle.svg"
-                onClick={() => document.getElementById("fileInput").click()}
-              />
+            <ImageUploadDiv
+              onClick={() => document.getElementById("fileInput").click()}
+            >
+              {picture ? (
+                <UploadedPicture
+                  src={URL.createObjectURL(picture)}
+                  alt="Uploaded"
+                />
+              ) : (
+                <PlusIcon src="/plus-circle.svg" />
+              )}
               <ImageUploadInput
                 id="fileInput"
                 type="file"
                 accept="image/*"
-                {...register("image")}
+                onChange={handlePictureUpload}
               />
             </ImageUploadDiv>
             {errors.image && <Error>{errors.image.message}</Error>}
@@ -343,6 +376,11 @@ const PlusIcon = styled.img`
 
 const ImageUploadInput = styled.input`
   display: none;
+`;
+const UploadedPicture = styled.img`
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: cover;
 `;
 
 const AgentSection = styled.div`
