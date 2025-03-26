@@ -1,10 +1,12 @@
 import axios from "axios";
+export const TOKEN = "9e7e98ba-e770-4f02-b29f-76edc0a3ed5a";
 
 const instance = axios.create({
-  baseURL: "https://api.real-estate-manager.redberryintership.ge/api",
+  baseURL: "https://api.real-estate-manager.redberryinternship.ge/api",
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
+    Authorization: `Bearer ${TOKEN}`,
   },
 });
 

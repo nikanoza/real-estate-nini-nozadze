@@ -24,11 +24,4 @@ export const agentSchema = yup.object().shape({
       "ტელეფონის ნომერი უნდა იწყებოდეს 5-ით და უნდა შეიცავდეს 9 ციფრს"
     )
     .required("ტელეფონის ნომერი აუცილებელია"),
-
-  avatar: yup
-    .mixed()
-    .required("ფოტოს ატვირთვა აუცილებელია")
-    .test("fileSize", "", (value) => {
-      return value && value.size <= 5 * 1024 * 1024;
-    }),
 });
