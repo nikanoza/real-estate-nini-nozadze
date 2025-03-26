@@ -1,7 +1,7 @@
 import axios from "axios";
 export const TOKEN = "9e7e98ba-e770-4f02-b29f-76edc0a3ed5a";
 
-const instance = axios.create({
+export const instance = axios.create({
   baseURL: "https://api.real-estate-manager.redberryinternship.ge/api",
   headers: {
     Accept: "application/json",
@@ -22,4 +22,3 @@ export const addAgent = async (agentData) => {
     throw error;
   }
 };
-export default instance;

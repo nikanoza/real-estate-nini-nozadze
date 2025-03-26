@@ -1,14 +1,4 @@
-import axios from "axios";
-export const TOKEN = "9e7e98ba-e770-4f02-b29f-76edc0a3ed5a";
-
-const instance = axios.create({
-  baseURL: "https://api.real-estate-manager.redberryinternship.ge/api",
-  headers: {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${TOKEN}`,
-  },
-});
+import { instance } from "./agentService";
 
 export const createRealEstateListing = async (listingData) => {
   try {
@@ -23,5 +13,3 @@ export const createRealEstateListing = async (listingData) => {
     throw error;
   }
 };
-
-export default instance;
