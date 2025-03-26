@@ -3,29 +3,17 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import GlobalStyle from "./GlobalStyles";
 import AgentModal from "@/components/agent-modal/AgentModal";
-import AddListing from "./add-listing/page";
+import Link from "next/link";
 
 export default function Home() {
   const [isAgentModalVisible, setIsAgentModalVisible] = useState(false);
-  const [isListingVisible, setIsListingVisible] = useState(false);
-  const [isPageVisible, setIsPageVisible] = useState(true);
 
   const handleOpenModal = () => {
     setIsAgentModalVisible(true);
-    setIsPageVisible(false);
   };
 
   const handleCloseModal = () => {
     setIsAgentModalVisible(false);
-  };
-
-  const handleOpenListing = () => {
-    setIsListingVisible(true);
-  };
-
-  const handleCloseListing = () => {
-    setIsListingVisible(false);
-    setIsPageVisible(true);
   };
 
   const regions = [
@@ -81,251 +69,244 @@ export default function Home() {
     <>
       <GlobalStyle />
       <WholeDiv $ismodalopen={isAgentModalVisible}>
-        {/* Conditionally render either Home or AddListing */}
-        {!isListingVisible && (
-          <div>
-            <Header>
-              <MainLogo src="/Redberry.svg" alt="Redberry Logo" />
-            </Header>
-            <FilterWrapper>
-              <FilterSection>
-                <FilterOptions>
-                  <RegionFilter onClick={toggleRegionFilter}>
-                    რეგიონი{" "}
+        <div>
+          <Header>
+            <MainLogo src="/Redberry.svg" alt="Redberry Logo" />
+          </Header>
+          <FilterWrapper>
+            <FilterSection>
+              <FilterOptions>
+                <RegionFilter onClick={toggleRegionFilter}>
+                  რეგიონი{" "}
+                  <Arrow
+                    src="/arrow.svg"
+                    alt="Arrow"
+                    $isopen={isRegionFilterVisible}
+                  />
+                </RegionFilter>
+                <PriceFilter onClick={togglePriceFilter}>
+                  საფასო კატეგორია{" "}
+                  <Arrow
+                    src="/arrow.svg"
+                    alt="Arrow"
+                    $isopen={isPriceFilterVisible}
+                  />
+                </PriceFilter>
+                <Container>
+                  <FilterButton onClick={toggleAreaFilter}>
+                    ფართობი{" "}
                     <Arrow
                       src="/arrow.svg"
                       alt="Arrow"
-                      $isopen={isRegionFilterVisible}
+                      $isopen={isAreaFilterVisible}
                     />
-                  </RegionFilter>
-                  <PriceFilter onClick={togglePriceFilter}>
-                    საფასო კატეგორია{" "}
-                    <Arrow
-                      src="/arrow.svg"
-                      alt="Arrow"
-                      $isopen={isPriceFilterVisible}
-                    />
-                  </PriceFilter>
-                  <Container>
-                    <FilterButton onClick={toggleAreaFilter}>
-                      ფართობი{" "}
-                      <Arrow
-                        src="/arrow.svg"
-                        alt="Arrow"
-                        $isopen={isAreaFilterVisible}
-                      />
-                    </FilterButton>
-                    {isAreaFilterVisible && (
-                      <FilterDropdown>
-                        <FilterHeading>ფართობის მიხედვით</FilterHeading>
-                        <InputsWrapper>
-                          <InputContainer>
-                            <StyledInput
-                              type="number"
-                              placeholder="დან"
-                              value={selectedMinArea}
-                              onChange={(e) =>
-                                setSelectedMinArea(e.target.value)
-                              }
-                            />
-                            <Label>მინ.მ²</Label>
-                            <Options>
-                              {[
-                                "50,000მ²",
-                                "50,000მ²",
-                                "50,000მ²",
-                                "50,000მ²",
-                                "50,000მ²",
-                              ].map((area, index) => (
-                                <Option
-                                  key={index}
-                                  onClick={() => setSelectedMinArea(area)}
-                                  selected={selectedMinArea === area}
-                                >
-                                  {area}
-                                </Option>
-                              ))}
-                            </Options>
-                          </InputContainer>
-                          <InputContainer>
-                            <StyledInput
-                              type="number"
-                              placeholder="მდე"
-                              value={selectedMaxArea}
-                              onChange={(e) =>
-                                setSelectedMaxArea(e.target.value)
-                              }
-                            />
-                            <Label>მაქს.მ²</Label>
-                            <Options>
-                              {[
-                                "50,000მ²",
-                                "50,000მ²",
-                                "50,000მ²",
-                                "50,000მ²",
-                                "50,000მ²",
-                              ].map((area, index) => (
-                                <Option
-                                  key={index}
-                                  onClick={() => setSelectedMaxArea(area)}
-                                  selected={selectedMaxArea === area}
-                                >
-                                  {area}
-                                </Option>
-                              ))}
-                            </Options>
-                          </InputContainer>
-                        </InputsWrapper>
-                        <ApplyButton>არჩევა</ApplyButton>
-                      </FilterDropdown>
-                    )}
-                  </Container>
-                  <BedroomsFilter onClick={toggleBedroomsFilter}>
-                    საძინებლების რაოდენობა{" "}
-                    <Arrow
-                      src="/arrow.svg"
-                      alt="Arrow"
-                      $isopen={isBedroomsFilterVisible}
-                    />
-                  </BedroomsFilter>
-
-                  {isBedroomsFilterVisible && (
-                    <BedroomsFilterDiv>
-                      <BedroomsHeading>საძინებლების რაოდენობა</BedroomsHeading>
-                      <BedroomsInput
-                        type="number"
-                        min="1"
-                        max="10"
-                        value={bedrooms}
-                        onChange={(e) => setBedrooms(e.target.value)}
-                        placeholder=""
-                      />
-                      <ChooseButton>არჩევა</ChooseButton>
-                    </BedroomsFilterDiv>
+                  </FilterButton>
+                  {isAreaFilterVisible && (
+                    <FilterDropdown>
+                      <FilterHeading>ფართობის მიხედვით</FilterHeading>
+                      <InputsWrapper>
+                        <InputContainer>
+                          <StyledInput
+                            type="number"
+                            placeholder="დან"
+                            value={selectedMinArea}
+                            onChange={(e) => setSelectedMinArea(e.target.value)}
+                          />
+                          <Label>მინ.მ²</Label>
+                          <Options>
+                            {[
+                              "50,000მ²",
+                              "50,000მ²",
+                              "50,000მ²",
+                              "50,000მ²",
+                              "50,000მ²",
+                            ].map((area, index) => (
+                              <Option
+                                key={index}
+                                onClick={() => setSelectedMinArea(area)}
+                                selected={selectedMinArea === area}
+                              >
+                                {area}
+                              </Option>
+                            ))}
+                          </Options>
+                        </InputContainer>
+                        <InputContainer>
+                          <StyledInput
+                            type="number"
+                            placeholder="მდე"
+                            value={selectedMaxArea}
+                            onChange={(e) => setSelectedMaxArea(e.target.value)}
+                          />
+                          <Label>მაქს.მ²</Label>
+                          <Options>
+                            {[
+                              "50,000მ²",
+                              "50,000მ²",
+                              "50,000მ²",
+                              "50,000მ²",
+                              "50,000მ²",
+                            ].map((area, index) => (
+                              <Option
+                                key={index}
+                                onClick={() => setSelectedMaxArea(area)}
+                                selected={selectedMaxArea === area}
+                              >
+                                {area}
+                              </Option>
+                            ))}
+                          </Options>
+                        </InputContainer>
+                      </InputsWrapper>
+                      <ApplyButton>არჩევა</ApplyButton>
+                    </FilterDropdown>
                   )}
-                </FilterOptions>
-                <ButtonGroup>
-                  <PrimaryButton onClick={handleOpenListing}>
+                </Container>
+                <BedroomsFilter onClick={toggleBedroomsFilter}>
+                  საძინებლების რაოდენობა{" "}
+                  <Arrow
+                    src="/arrow.svg"
+                    alt="Arrow"
+                    $isopen={isBedroomsFilterVisible}
+                  />
+                </BedroomsFilter>
+
+                {isBedroomsFilterVisible && (
+                  <BedroomsFilterDiv>
+                    <BedroomsHeading>საძინებლების რაოდენობა</BedroomsHeading>
+                    <BedroomsInput
+                      type="number"
+                      min="1"
+                      max="10"
+                      value={bedrooms}
+                      onChange={(e) => setBedrooms(e.target.value)}
+                      placeholder=""
+                    />
+                    <ChooseButton>არჩევა</ChooseButton>
+                  </BedroomsFilterDiv>
+                )}
+              </FilterOptions>
+              <ButtonGroup>
+                <Link href="/add-listing">
+                  <PrimaryButton>
                     <WhitePlus src="/whitePlus.svg" alt="Plus" />
                     ლისტინგის დამატება
                   </PrimaryButton>
-                  <SecondaryButton onClick={handleOpenModal}>
-                    <OrangePlus src="/orangePlus.svg" alt="Plus" />
-                    აგენტის დამატება
-                  </SecondaryButton>
-                </ButtonGroup>
-              </FilterSection>
-              {isRegionFilterVisible && (
-                <RegionFilterDiv>
-                  <LittleHeading>რეგიონის მიხედვით</LittleHeading>
-                  <RegionNames>
-                    {regions.map((region, index) => (
-                      <RegionItem
-                        key={index}
-                        onClick={() => toggleRegion(region)}
-                      >
-                        <HiddenCheckbox
-                          type="checkbox"
-                          checked={selectedRegions.includes(region)}
-                          readOnly
-                        />
-                        <StyledCheckbox
-                          checked={selectedRegions.includes(region)}
-                        />
-                        {region}
-                      </RegionItem>
-                    ))}
-                  </RegionNames>
-                  <SelectRegion>არჩევა</SelectRegion>
-                </RegionFilterDiv>
-              )}
-              {isPriceFilterVisible && (
-                <PriceFilterDiv>
-                  <PriceHeading>ფასის მიხედვით</PriceHeading>
-                  <JustDiv>
-                    <MinInputDiv>
-                      <MinInput type="number" placeholder="დან" />
-                      <MinPriceLabel>მინ.ფასი</MinPriceLabel>
-                      <PriceOptions>
-                        {[
-                          "50,000ლ",
-                          "100,000ლ",
-                          "150,000ლ",
-                          "200,000ლ",
-                          "300,000ლ",
-                        ].map((price, index) => (
-                          <PriceOption
-                            key={index}
-                            onClick={() => setSelectedMinPrice(price)}
-                            selected={selectedMinPrice === price}
-                          >
-                            {price}
-                          </PriceOption>
-                        ))}
-                      </PriceOptions>
-                    </MinInputDiv>
-                    <MaxInputDiv>
-                      <MaxInput type="number" placeholder="მდე" />
-                      <MaxPriceLabel>მაქს.ფასი</MaxPriceLabel>
-                      <PriceOptionss>
-                        {[
-                          "50,000ლ",
-                          "100,000ლ",
-                          "150,000ლ",
-                          "200,000ლ",
-                          "300,000ლ",
-                        ].map((price, index) => (
-                          <PriceOption
-                            key={index}
-                            onClick={() => setSelectedMaxPrice(price)}
-                            selected={selectedMaxPrice === price}
-                          >
-                            {price}
-                          </PriceOption>
-                        ))}
-                      </PriceOptionss>
-                    </MaxInputDiv>
-                  </JustDiv>
-                  <ChooseBtn>არჩევა</ChooseBtn>
-                </PriceFilterDiv>
-              )}
-            </FilterWrapper>
-            <ListingContainer>
-              {Array.from({ length: 8 }).map((_, index) => (
-                <ListingCard key={index}>
-                  <ImageWrapper>
-                    <TagImgDiv>
-                      <TagImg src="/Tag.svg" alt="Tag" />
-                    </TagImgDiv>
-                    <PropertyImage src="/image.svg" alt="Property" />
-                  </ImageWrapper>
-                  <Price>80 000ლ</Price>
-                  <Location>
-                    <LocIcon src="/LocIcon.svg" alt="Location" /> თბილისი,
-                    ი.ჭავჭავაძის 53
-                  </Location>
-                  <Details>
-                    <DetailItem>
-                      <Icon src="/bed.svg" alt="Bed" />2
-                    </DetailItem>
-                    <DetailItem>
-                      <Icon src="/Vector.svg" alt="Area" />
-                      55მ2
-                    </DetailItem>
-                    <DetailItem>
-                      <Icon src="/index.svg" alt="Index" />
-                      0160
-                    </DetailItem>
-                  </Details>
-                </ListingCard>
-              ))}
-            </ListingContainer>
-          </div>
-        )}
+                </Link>
 
-        {isListingVisible && <AddListing onClose={handleCloseListing} />}
+                <SecondaryButton onClick={handleOpenModal}>
+                  <OrangePlus src="/orangePlus.svg" alt="Plus" />
+                  აგენტის დამატება
+                </SecondaryButton>
+              </ButtonGroup>
+            </FilterSection>
+            {isRegionFilterVisible && (
+              <RegionFilterDiv>
+                <LittleHeading>რეგიონის მიხედვით</LittleHeading>
+                <RegionNames>
+                  {regions.map((region, index) => (
+                    <RegionItem
+                      key={index}
+                      onClick={() => toggleRegion(region)}
+                    >
+                      <HiddenCheckbox
+                        type="checkbox"
+                        checked={selectedRegions.includes(region)}
+                        readOnly
+                      />
+                      <StyledCheckbox
+                        checked={selectedRegions.includes(region)}
+                      />
+                      {region}
+                    </RegionItem>
+                  ))}
+                </RegionNames>
+                <SelectRegion>არჩევა</SelectRegion>
+              </RegionFilterDiv>
+            )}
+            {isPriceFilterVisible && (
+              <PriceFilterDiv>
+                <PriceHeading>ფასის მიხედვით</PriceHeading>
+                <JustDiv>
+                  <MinInputDiv>
+                    <MinInput type="number" placeholder="დან" />
+                    <MinPriceLabel>მინ.ფასი</MinPriceLabel>
+                    <PriceOptions>
+                      {[
+                        "50,000ლ",
+                        "100,000ლ",
+                        "150,000ლ",
+                        "200,000ლ",
+                        "300,000ლ",
+                      ].map((price, index) => (
+                        <PriceOption
+                          key={index}
+                          onClick={() => setSelectedMinPrice(price)}
+                          selected={selectedMinPrice === price}
+                        >
+                          {price}
+                        </PriceOption>
+                      ))}
+                    </PriceOptions>
+                  </MinInputDiv>
+                  <MaxInputDiv>
+                    <MaxInput type="number" placeholder="მდე" />
+                    <MaxPriceLabel>მაქს.ფასი</MaxPriceLabel>
+                    <PriceOptionss>
+                      {[
+                        "50,000ლ",
+                        "100,000ლ",
+                        "150,000ლ",
+                        "200,000ლ",
+                        "300,000ლ",
+                      ].map((price, index) => (
+                        <PriceOption
+                          key={index}
+                          onClick={() => setSelectedMaxPrice(price)}
+                          selected={selectedMaxPrice === price}
+                        >
+                          {price}
+                        </PriceOption>
+                      ))}
+                    </PriceOptionss>
+                  </MaxInputDiv>
+                </JustDiv>
+                <ChooseBtn>არჩევა</ChooseBtn>
+              </PriceFilterDiv>
+            )}
+          </FilterWrapper>
+          <ListingContainer>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <ListingCard key={index}>
+                <ImageWrapper>
+                  <TagImgDiv>
+                    <TagImg src="/Tag.svg" alt="Tag" />
+                  </TagImgDiv>
+                  <PropertyImage src="/image.svg" alt="Property" />
+                </ImageWrapper>
+                <Price>80 000ლ</Price>
+                <Location>
+                  <LocIcon src="/LocIcon.svg" alt="Location" /> თბილისი,
+                  ი.ჭავჭავაძის 53
+                </Location>
+                <Details>
+                  <DetailItem>
+                    <Icon src="/bed.svg" alt="Bed" />2
+                  </DetailItem>
+                  <DetailItem>
+                    <Icon src="/Vector.svg" alt="Area" />
+                    55მ2
+                  </DetailItem>
+                  <DetailItem>
+                    <Icon src="/index.svg" alt="Index" />
+                    0160
+                  </DetailItem>
+                </Details>
+              </ListingCard>
+            ))}
+          </ListingContainer>
+        </div>
       </WholeDiv>
-
       {isAgentModalVisible && <AgentModal onClose={handleCloseModal} />}
     </>
   );

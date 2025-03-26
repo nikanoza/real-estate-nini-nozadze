@@ -6,23 +6,13 @@ export const addListingSchema = yup.object().shape({
     .min(2, "მისამართი უნდა შეიცავდეს მინიმუმ 2 სიმბოლოს")
     .required("მისამართი აუცილებელია"),
 
-  image: yup
-    .mixed()
-    .required("ფოტოს ატვირთვა აუცილებელია")
-    .test("fileType", "ფოტოს ატვირთვა აუცილებელია", (value) => {
-      return (
-        value && ["image/jpeg", "image/png", "image/jpg"].includes(value.type)
-      );
-    })
-    .test("fileSize", "ფაილის ზომა არ უნდა აღემატებოდეს 1MB-ს", (value) => {
-      return value && value.size <= 1 * 1024 * 1024; // 1MB limit
-    }),
+  // image: yup.mixed().required("ფოტოს ატვირთვა აუცილებელია"),
 
-  region: yup.string().required("რეგიონი აუცილებელია"),
+  region_id: yup.string().required("რეგიონი აუცილებელია"),
 
-  city: yup.string().required("ქალაქი აუცილებელია"),
+  city_id: yup.string().required("ქალაქი აუცილებელია"),
 
-  postalCode: yup
+  zip_code: yup
     .string()
     .matches(/^\d+$/, "საფოსტო კოდი უნდა შეიცავდეს მხოლოდ ციფრებს")
     .required("საფოსტო კოდი აუცილებელია"),
@@ -50,10 +40,10 @@ export const addListingSchema = yup.object().shape({
     })
     .required("აღწერა აუცილებელია"),
 
-  listingType: yup
+  is_rental: yup
     .string()
     .oneOf(["sale", "rent"], "აირჩიეთ იყიდება ან ქირავდება")
     .required("აირჩიეთ იყიდება ან ქირავდება"),
 
-  agent: yup.string().required("აგენტის არჩევა აუცილებელია"),
+  agent_id: yup.string().required("აგენტის არჩევა აუცილებელია"),
 });

@@ -34,9 +34,6 @@ export default function AgentModal({ onClose }) {
     formData.append("email", data.email);
     formData.append("phone", data.phone);
     formData.append("avatar", image);  
-  
-    console.log("Submitting formData:", formData);  
-  
     try {
       const response = await addAgent(formData);
       console.log("Agent added successfully:", response);
@@ -118,18 +115,19 @@ export default function AgentModal({ onClose }) {
     <UploadLabel>ატვირთეთ ფოტო*</UploadLabel>
     <UploadBox onClick={() => document.getElementById("fileInput").click()}>
       {image ? (
-        <UploadedImage src={(URL.createObjectURL(image))} alt="Uploaded" />
+        <UploadedImage src={URL.createObjectURL(image)} alt="Uploaded" />
       ) : (
         <PlusIcon src="/plus-circle.svg" />
       )}
-    </UploadBox>
-    <HiddenFileInput
+      <HiddenFileInput
       id="fileInput"
       type="file"
       accept="image/*"
       onChange={handleImageUpload}
     />
     {errors.avatar && <Error>{errors.avatar.message}</Error>}
+    </UploadBox>
+    
   </UploadContainer>
 
             <ButtonRow>
