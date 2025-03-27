@@ -25,8 +25,6 @@ export default function AgentModal({ onClose }) {
     }
   };
 
-
-
   const onSubmit = async (data) => {
    const formData = new FormData();
     formData.append("name", data.name);
@@ -132,13 +130,12 @@ export default function AgentModal({ onClose }) {
 
             <ButtonRow>
               <CancelButton type="button" onClick={onClose}>გაუქმება</CancelButton>
-              <AddButton type="submit" onClick={handleSubmit(onSubmit)}> დაამატე აგენტი</AddButton>
+              <AddButton type="submit"> დაამატე აგენტი</AddButton>
             </ButtonRow>
           </form>
         </ModalContainer>
       </Backdrop>
     </>
-   
   );
   
 }

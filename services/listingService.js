@@ -3,7 +3,9 @@ import { instance } from "./agentService";
 export const createRealEstateListing = async (listingData) => {
   try {
     console.log("Listing data being sent:", listingData);
-    const response = await instance.post("/listings", listingData);
+    const response = await instance.post("/real-estates", listingData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
     return response.data;
   } catch (error) {
     console.error(

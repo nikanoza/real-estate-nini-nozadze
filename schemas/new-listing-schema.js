@@ -6,11 +6,9 @@ export const addListingSchema = yup.object().shape({
     .min(2, "მისამართი უნდა შეიცავდეს მინიმუმ 2 სიმბოლოს")
     .required("მისამართი აუცილებელია"),
 
-  // image: yup.mixed().required("ფოტოს ატვირთვა აუცილებელია"),
+  region_id: yup.number().required("რეგიონი აუცილებელია"),
 
-  region_id: yup.string().required("რეგიონი აუცილებელია"),
-
-  city_id: yup.string().required("ქალაქი აუცილებელია"),
+  city_id: yup.number().required("ქალაქი აუცილებელია"),
 
   zip_code: yup
     .string()
@@ -42,7 +40,7 @@ export const addListingSchema = yup.object().shape({
 
   is_rental: yup
     .string()
-    .oneOf(["sale", "rent"], "აირჩიეთ იყიდება ან ქირავდება")
+    .oneOf(["0", "1"], "აირჩიეთ იყიდება ან ქირავდება")
     .required("აირჩიეთ იყიდება ან ქირავდება"),
 
   agent_id: yup.string().required("აგენტის არჩევა აუცილებელია"),
