@@ -130,7 +130,7 @@ export default function AgentModal({ onClose }) {
 
             <ButtonRow>
               <CancelButton type="button" onClick={onClose}>გაუქმება</CancelButton>
-              <AddButton type="submit" onClick={handleSubmit(onSubmit)}> დაამატე აგენტი</AddButton>
+              <AddButton type="submit"> დაამატე აგენტი</AddButton>
             </ButtonRow>
           </form>
         </ModalContainer>

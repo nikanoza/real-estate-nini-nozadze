@@ -9,7 +9,7 @@ import GlobalStyle from "../GlobalStyles";
 import AgentModal from "@/components/agent-modal/AgentModal";
 import { getAgents } from "@/services/agentService";
 import { getRegions, getCities } from "@/services/regionCityServices";
-
+import { createRealEstateListing } from "@/services/listingService";
 export default function AddListing() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [picture, setPicture] = useState(null);
@@ -51,6 +51,7 @@ export default function AddListing() {
     register,
     handleSubmit,
     formState: { errors },
+    watch,
   } = useForm({
     resolver: yupResolver(addListingSchema),
   });
@@ -62,18 +63,23 @@ export default function AddListing() {
     }
   };
 
+  const selectedRegionId = watch("region_id");
+  const filteredCities = cities.filter(
+    (city) => String(city.region_id) === String(selectedRegionId)
+  );
+
   const onSubmit = async (data) => {
     const formData = new FormData();
 
     formData.append("address", data.address);
-    formData.append("region_id", data.region_id);
-    formData.append("city_id", data.city_id);
+    formData.append("region_id", Number(data.region_id));
+    formData.append("city_id", +data.city_id);
     formData.append("zip_code", data.zip_code);
     formData.append("price", data.price);
     formData.append("area", data.area);
     formData.append("bedrooms", data.bedrooms);
     formData.append("description", data.description);
-    formData.append("is_rental", data.is_rental);
+    formData.append("is_rental", +data.is_rental);
     formData.append("agent_id", data.agent_id);
     formData.append("image", picture);
     try {
@@ -102,15 +108,15 @@ export default function AddListing() {
             <Label>გარიგების ტიპი:</Label>
             <DealTypeOptions>
               <label>
-                <input type="radio" {...register("listingType")} value="sale" />
+                <input type="radio" {...register("is_rental")} value="0" />
                 იყიდება
               </label>
               <label>
-                <input type="radio" {...register("listingType")} value="rent" />
+                <input type="radio" {...register("is_rental")} value="1" />
                 ქირავდება
               </label>
             </DealTypeOptions>
-            {errors.listingType && <Error>{errors.listingType.message}</Error>}
+            {errors.is_rental && <Error>{errors.is_rental.message}</Error>}
           </DealTypeDiv>
 
           <SectionHeader>მდებარეობა</SectionHeader>
@@ -128,9 +134,9 @@ export default function AddListing() {
             </InputWrapper>
             <InputWrapper>
               <Label>საფოსტო ინდექსი*</Label>
-              <Input {...register("postalCode")} />
-              {errors.postalCode && <Error>{errors.postalCode.message}</Error>}
-              {!errors.postalCode && (
+              <Input {...register("zip_code")} />
+              {errors.zip_code && <Error>{errors.zip_code.message}</Error>}
+              {!errors.zip_code && (
                 <ValidationWrapper>
                   <TickImg src="/tick.svg" />
                   <SymbolsQuantity>მხოლოდ რიცხვები</SymbolsQuantity>
@@ -147,20 +153,21 @@ export default function AddListing() {
                   </option>
                 ))}
               </Select>
-              {errors.region && <Error>{errors.region.message}</Error>}
+              {errors.region_id && <Error>{errors.region_id.message}</Error>}
             </InputWrapper>
 
             <InputWrapper>
               <Label>ქალაქი</Label>
               <Select {...register("city_id")}>
                 <option value="">აირჩიეთ ქალაქი</option>
-                {cities.map((city) => (
+                {filteredCities.map((city) => (
                   <option key={city.id} value={city.id}>
                     {city.name}
                   </option>
                 ))}
               </Select>
-              {errors.city && <Error>{errors.city.message}</Error>}
+
+              {errors.city_id && <Error>{errors.city_id.message}</Error>}
             </InputWrapper>
           </LocationGrid>
           <SectionHeader>ბინის დეტალები</SectionHeader>
@@ -233,7 +240,7 @@ export default function AddListing() {
                 onChange={handlePictureUpload}
               />
             </ImageUploadDiv>
-            {errors.image && <Error>{errors.image.message}</Error>}
+            {errors.picture && <Error>{errors.picture.message}</Error>}
           </InputWrapper>
 
           <AgentSection>
@@ -267,9 +274,7 @@ export default function AddListing() {
 
           <ButtonContainer>
             <CancelButton type="button">გაუქმება</CancelButton>
-            <SubmitButton type="submit" onClick={handleSubmit(onSubmit)}>
-              დაამატე ლისტინგი
-            </SubmitButton>
+            <SubmitButton type="submit">დაამატე ლისტინგი</SubmitButton>
           </ButtonContainer>
         </FormsDiv>
       </ContainerDiv>
