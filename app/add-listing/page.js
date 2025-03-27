@@ -8,11 +8,14 @@ import styled from "styled-components";
 import GlobalStyle from "../GlobalStyles";
 import AgentModal from "@/components/agent-modal/AgentModal";
 import { getAgents } from "@/services/agentService";
+import { getRegions, getCities } from "@/services/regionCityServices";
 
 export default function AddListing() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [picture, setPicture] = useState(null);
   const [agents, setAgents] = useState([]);
+  const [regions, setRegions] = useState([]);
+  const [cities, setCities] = useState([]);
 
   useEffect(() => {
     const fetchAgents = async () => {
@@ -25,6 +28,23 @@ export default function AddListing() {
     };
 
     fetchAgents();
+  }, []);
+
+  useEffect(() => {
+    const fetchLocationData = async () => {
+      try {
+        const [regionData, cityData] = await Promise.all([
+          getRegions(),
+          getCities(),
+        ]);
+        setRegions(regionData);
+        setCities(cityData);
+      } catch (err) {
+        console.error("Error loading region/city data:", err);
+      }
+    };
+
+    fetchLocationData();
   }, []);
 
   const {
@@ -119,23 +139,26 @@ export default function AddListing() {
             </InputWrapper>
             <InputWrapper>
               <Label>რეგიონი</Label>
-              <Select {...register("region")}>
+              <Select {...register("region_id")}>
                 <option value="">აირჩიეთ რეგიონი</option>
-                <option value="imereti">იმერეთი</option>
-                <option value="imereti">შიდა ქართლი</option>
-                <option value="samegrelo">სამეგრელო</option>
-                <option value="guria">გურია</option>
+                {regions.map((region) => (
+                  <option key={region.id} value={region.id}>
+                    {region.name}
+                  </option>
+                ))}
               </Select>
               {errors.region && <Error>{errors.region.message}</Error>}
             </InputWrapper>
 
             <InputWrapper>
               <Label>ქალაქი</Label>
-              <Select {...register("city")}>
+              <Select {...register("city_id")}>
                 <option value="">აირჩიეთ ქალაქი</option>
-                <option value="kutaisi">ქუთაისი</option>
-                <option value="batumi">ბათუმი</option>
-                <option value="tbilisi">თბილისი</option>
+                {cities.map((city) => (
+                  <option key={city.id} value={city.id}>
+                    {city.name}
+                  </option>
+                ))}
               </Select>
               {errors.city && <Error>{errors.city.message}</Error>}
             </InputWrapper>
