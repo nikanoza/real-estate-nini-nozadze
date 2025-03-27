@@ -1,5 +1,5 @@
 import axios from "axios";
-export const TOKEN = "9e7e98ba-e770-4f02-b29f-76edc0a3ed5a";
+export const TOKEN = "9e87a937-af73-4647-8520-fb85fe54ae10";
 
 export const instance = axios.create({
   baseURL: "https://api.real-estate-manager.redberryinternship.ge/api",
@@ -19,6 +19,19 @@ export const addAgent = async (agentData) => {
     return response.data;
   } catch (error) {
     console.error("Error adding agent:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const getAgents = async () => {
+  try {
+    const response = await instance.get("/agents");
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error fetching agents:",
+      error.response?.data || error.message
+    );
     throw error;
   }
 };

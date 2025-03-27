@@ -25,8 +25,6 @@ export default function AgentModal({ onClose }) {
     }
   };
 
-
-
   const onSubmit = async (data) => {
    const formData = new FormData();
     formData.append("name", data.name);
@@ -138,7 +136,6 @@ export default function AgentModal({ onClose }) {
         </ModalContainer>
       </Backdrop>
     </>
-   
   );
   
 }

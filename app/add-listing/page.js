@@ -1,16 +1,32 @@
 "use client";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { addListingSchema } from "@/schemas/new-listing-schema";
 import React from "react";
 import styled from "styled-components";
 import GlobalStyle from "../GlobalStyles";
 import AgentModal from "@/components/agent-modal/AgentModal";
+import { getAgents } from "@/services/agentService";
 
 export default function AddListing() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [picture, setPicture] = useState(null);
+  const [agents, setAgents] = useState([]);
+
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const agentList = await getAgents();
+        setAgents(agentList);
+      } catch (err) {
+        console.error("Failed to load agents:", err);
+      }
+    };
+
+    fetchAgents();
+  }, []);
+
   const {
     register,
     handleSubmit,
@@ -58,7 +74,7 @@ export default function AddListing() {
 
   return (
     <>
-      <ContainerDiv isModalOpen={isModalOpen}>
+      <ContainerDiv $isModalOpen={isModalOpen}>
         <GlobalStyle />
         <AddListingHeader>ლისტინგის დამატება</AddListingHeader>
         <FormsDiv onSubmit={handleSubmit(onSubmit)}>
@@ -204,8 +220,13 @@ export default function AddListing() {
               <tbody>
                 <tr>
                   <td>
-                    <ChooseAgent {...register("agent")}>
-                      <option value="">აირჩიე</option>
+                    <ChooseAgent {...register("agent_id")}>
+                      <option value="">აირჩიე აგენტი</option>
+                      {agents.map((agent) => (
+                        <option key={agent.id} value={agent.id}>
+                          {agent.name} {agent.surname}
+                        </option>
+                      ))}
                     </ChooseAgent>
                   </td>
                 </tr>
@@ -216,15 +237,6 @@ export default function AddListing() {
                       <span>დაამატე აგენტი</span>
                     </IconTextWrapper>
                   </td>
-                </tr>
-                <tr>
-                  <td>იმერეთი</td>
-                </tr>
-                <tr>
-                  <td>სამეგრელო</td>
-                </tr>
-                <tr>
-                  <td>გურია</td>
                 </tr>
               </tbody>
             </AgentTable>
@@ -270,7 +282,7 @@ const SymbolsQuantity = styled.p`
 const ContainerDiv = styled.div`
   display: grid;
   justify-items: center;
-  ${(props) => props.isModalOpen && `filter: blur(5px);`}
+  ${({ $isModalOpen }) => $isModalOpen && `filter: blur(5px);`}
 `;
 const AddListingHeader = styled.h1``;
 
