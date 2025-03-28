@@ -1,36 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import GlobalStyle from "./GlobalStyles";
 import AgentModal from "@/components/agent-modal/AgentModal";
 import Link from "next/link";
+import { getRegions } from "@/services/regionCityServices";
+import { getListings } from "@/services/listingService";
 
 export default function Home() {
-  const [isAgentModalVisible, setIsAgentModalVisible] = useState(false);
-
-  const handleOpenModal = () => {
-    setIsAgentModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsAgentModalVisible(false);
-  };
-
-  const regions = [
-    "ქართლი",
-    "კახეთი",
-    "იმერეთი",
-    "სამეგრელო",
-    "გურია",
-    "რაჭა",
-    "ლეჩხუმი",
-    "სამცხე-ჯავახეთი",
-    "აჭარა",
-    "სვანეთი",
-    "მცხეთა-მთიანეთი",
-    "თბილისი",
-  ];
-
   const [selectedRegions, setSelectedRegions] = useState([]);
   const [isRegionFilterVisible, setIsRegionFilterVisible] = useState(false);
   const [isPriceFilterVisible, setIsPriceFilterVisible] = useState(false);
@@ -41,6 +18,89 @@ export default function Home() {
   const [selectedMaxArea, setSelectedMaxArea] = useState("");
   const [isBedroomsFilterVisible, setIsBedroomsFilterVisible] = useState(false);
   const [bedrooms, setBedrooms] = useState("");
+  const [isAgentModalVisible, setIsAgentModalVisible] = useState(false);
+  const [regions, setRegions] = useState([]);
+  const [listings, setListings] = useState([]);
+
+  const [applyRegionFilter, setApplyRegionFilter] = useState(false);
+  const [appliedRegions, setAppliedRegions] = useState([]);
+
+  const [applyPriceFilter, setApplyPriceFilter] = useState(false);
+  const [applyAreaFilter, setApplyAreaFilter] = useState(false);
+  const [applyBedroomsFilter, setApplyBedroomsFilter] = useState(false);
+
+  const [showAppliedRegionTags, setShowAppliedRegionTags] = useState(false);
+  const [showAppliedPriceTag, setShowAppliedPriceTag] = useState(false);
+  const [showAppliedBedroomsTag, setShowAppliedBedroomsTag] = useState(false);
+
+  const [showAppliedAreaTag, setShowAppliedAreaTag] = useState(false);
+  const [tempMinPrice, setTempMinPrice] = useState("");
+  const [tempMaxPrice, setTempMaxPrice] = useState("");
+  const [tempMinArea, setTempMinArea] = useState("");
+  const [tempMaxArea, setTempMaxArea] = useState("");
+  const [appliedBedrooms, setAppliedBedrooms] = useState(null);
+
+  const [priceError, setPriceError] = useState("");
+  const [areaError, setAreaError] = useState("");
+
+  useEffect(() => {
+    const fetchRegions = async () => {
+      try {
+        const regionList = await getRegions();
+        setRegions(regionList);
+      } catch (err) {
+        console.error("Failed to fetch regions:", err);
+      }
+    };
+
+    fetchRegions();
+  }, []);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const data = await getListings();
+        setListings(data);
+      } catch (err) {
+        console.error("Failed to fetch listings:", err);
+      }
+    };
+
+    fetchListings();
+  }, []);
+
+  const cleanValue = (val) =>
+    typeof val === "string" ? Number(val.replace(/[^0-9.]/g, "")) : Number(val);
+
+  const filteredListings = listings.filter((listing) => {
+    const regionName = listing.city?.region?.name;
+
+    const matchesRegion =
+      !applyRegionFilter || appliedRegions.includes(regionName);
+
+    const matchesPrice =
+      !applyPriceFilter ||
+      ((!selectedMinPrice || listing.price >= cleanValue(selectedMinPrice)) &&
+        (!selectedMaxPrice || listing.price <= cleanValue(selectedMaxPrice)));
+
+    const matchesArea =
+      !applyAreaFilter ||
+      ((!selectedMinArea || listing.area >= cleanValue(selectedMinArea)) &&
+        (!selectedMaxArea || listing.area <= cleanValue(selectedMaxArea)));
+
+    const matchesBedrooms =
+      !applyBedroomsFilter || listing.bedrooms === Number(appliedBedrooms);
+
+    return matchesRegion && matchesPrice && matchesArea && matchesBedrooms;
+  });
+
+  const handleOpenModal = () => {
+    setIsAgentModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsAgentModalVisible(false);
+  };
 
   const toggleBedroomsFilter = () => {
     setIsBedroomsFilterVisible((prev) => !prev);
@@ -65,6 +125,26 @@ export default function Home() {
     setIsPriceFilterVisible((prev) => !prev);
   };
 
+  const handleRemoveRegion = (regionToRemove) => {
+    const updatedSelected = selectedRegions.filter((r) => r !== regionToRemove);
+    const updatedApplied = appliedRegions.filter((r) => r !== regionToRemove);
+
+    setSelectedRegions(updatedSelected);
+    setAppliedRegions(updatedApplied);
+
+    if (updatedApplied.length === 0) {
+      setApplyRegionFilter(false);
+      setShowAppliedRegionTags(false);
+    }
+  };
+
+  const handleRemoveAreaFilter = () => {
+    setSelectedMinArea("");
+    setSelectedMaxArea("");
+    setApplyAreaFilter(false);
+    setShowAppliedAreaTag(false);
+  };
+
   return (
     <>
       <GlobalStyle />
@@ -84,6 +164,7 @@ export default function Home() {
                     $isopen={isRegionFilterVisible}
                   />
                 </RegionFilter>
+
                 <PriceFilter onClick={togglePriceFilter}>
                   საფასო კატეგორია{" "}
                   <Arrow
@@ -109,56 +190,70 @@ export default function Home() {
                           <StyledInput
                             type="number"
                             placeholder="დან"
-                            value={selectedMinArea}
-                            onChange={(e) => setSelectedMinArea(e.target.value)}
+                            value={tempMinArea}
+                            onChange={(e) => setTempMinArea(e.target.value)}
                           />
                           <Label>მინ.მ²</Label>
                           <Options>
-                            {[
-                              "50,000მ²",
-                              "50,000მ²",
-                              "50,000მ²",
-                              "50,000მ²",
-                              "50,000მ²",
-                            ].map((area, index) => (
-                              <Option
-                                key={index}
-                                onClick={() => setSelectedMinArea(area)}
-                                selected={selectedMinArea === area}
-                              >
-                                {area}
-                              </Option>
-                            ))}
+                            {[50000, 60000, 70000, 80000, 90000].map(
+                              (area, index) => (
+                                <Option
+                                  key={index}
+                                  onClick={() => setTempMinArea(area)}
+                                  selected={Number(tempMinArea) === area}
+                                >
+                                  {area.toLocaleString()}მ²
+                                </Option>
+                              )
+                            )}
                           </Options>
                         </InputContainer>
                         <InputContainer>
                           <StyledInput
                             type="number"
                             placeholder="მდე"
-                            value={selectedMaxArea}
-                            onChange={(e) => setSelectedMaxArea(e.target.value)}
+                            value={tempMaxArea}
+                            onChange={(e) => setTempMaxArea(e.target.value)}
                           />
                           <Label>მაქს.მ²</Label>
                           <Options>
-                            {[
-                              "50,000მ²",
-                              "50,000მ²",
-                              "50,000მ²",
-                              "50,000მ²",
-                              "50,000მ²",
-                            ].map((area, index) => (
-                              <Option
-                                key={index}
-                                onClick={() => setSelectedMaxArea(area)}
-                                selected={selectedMaxArea === area}
-                              >
-                                {area}
-                              </Option>
-                            ))}
+                            {[60000, 70000, 80000, 90000, 100000].map(
+                              (area, index) => (
+                                <Option
+                                  key={index}
+                                  onClick={() => setTempMaxArea(area)}
+                                  selected={Number(tempMaxArea) === area}
+                                >
+                                  {area.toLocaleString()}მ²
+                                </Option>
+                              )
+                            )}
                           </Options>
                         </InputContainer>
                       </InputsWrapper>
-                      <ApplyButton>არჩევა</ApplyButton>
+                      <ApplyButton
+                        onClick={() => {
+                          const min = cleanValue(tempMinArea);
+                          const max = cleanValue(tempMaxArea);
+
+                          if (min && max && min > max) {
+                            setAreaError("შეიყვანეთ ვალიდური რიცხვები");
+                            return;
+                          }
+
+                          setSelectedMinArea(tempMinArea);
+                          setSelectedMaxArea(tempMaxArea);
+                          setApplyAreaFilter(true);
+                          setShowAppliedAreaTag(true);
+                          setIsAreaFilterVisible(false);
+                          setAreaError("");
+                        }}
+                      >
+                        არჩევა
+                      </ApplyButton>
+                      {areaError && (
+                        <ValidationError>{areaError}</ValidationError>
+                      )}
                     </FilterDropdown>
                   )}
                 </Container>
@@ -182,12 +277,22 @@ export default function Home() {
                       onChange={(e) => setBedrooms(e.target.value)}
                       placeholder=""
                     />
-                    <ChooseButton>არჩევა</ChooseButton>
+                    <ChooseButton
+                      onClick={() => {
+                        setAppliedBedrooms(bedrooms);
+                        setApplyBedroomsFilter(true);
+                        setIsBedroomsFilterVisible(false);
+                        setShowAppliedBedroomsTag(true);
+                      }}
+                    >
+                      არჩევა
+                    </ChooseButton>
                   </BedroomsFilterDiv>
                 )}
               </FilterOptions>
+
               <ButtonGroup>
-                <Link href="/add-listing">
+                <Link style={{ textDecoration: "none" }} href="/add-listing">
                   <PrimaryButton>
                     <WhitePlus src="/whitePlus.svg" alt="Plus" />
                     ლისტინგის დამატება
@@ -200,110 +305,253 @@ export default function Home() {
                 </SecondaryButton>
               </ButtonGroup>
             </FilterSection>
+            {(showAppliedRegionTags ||
+              showAppliedPriceTag ||
+              showAppliedAreaTag ||
+              showAppliedBedroomsTag) && (
+              <FilterTagsWrapper>
+                <SelectedRegionTags>
+                  {showAppliedRegionTags &&
+                    selectedRegions.map((region) => (
+                      <Tag key={region}>
+                        {region}
+                        <RemoveIcon onClick={() => handleRemoveRegion(region)}>
+                          ×
+                        </RemoveIcon>
+                      </Tag>
+                    ))}
+
+                  {showAppliedPriceTag &&
+                    (selectedMinPrice || selectedMaxPrice) && (
+                      <Tag>
+                        {selectedMinPrice || "მინ"}₾ -{" "}
+                        {selectedMaxPrice || "მაქს"}₾
+                        <RemoveIcon
+                          onClick={() => {
+                            setSelectedMinPrice(null);
+                            setSelectedMaxPrice(null);
+                            setApplyPriceFilter(false);
+                            setShowAppliedPriceTag(false);
+                          }}
+                        >
+                          ×
+                        </RemoveIcon>
+                      </Tag>
+                    )}
+
+                  {showAppliedAreaTag &&
+                    (selectedMinArea || selectedMaxArea) && (
+                      <Tag>
+                        {selectedMinArea || "მინ"}მ² -{" "}
+                        {selectedMaxArea || "მაქს"}მ²
+                        <RemoveIcon
+                          onClick={() => {
+                            setSelectedMinArea("");
+                            setSelectedMaxArea("");
+                            setApplyAreaFilter(false);
+                            setShowAppliedAreaTag(false);
+                          }}
+                        >
+                          ×
+                        </RemoveIcon>
+                      </Tag>
+                    )}
+
+                  {showAppliedBedroomsTag && appliedBedrooms && (
+                    <Tag>
+                      {appliedBedrooms} საძინებელი
+                      <RemoveIcon
+                        onClick={() => {
+                          setAppliedBedrooms(null);
+                          setApplyBedroomsFilter(false);
+                          setShowAppliedBedroomsTag(false);
+                        }}
+                      >
+                        ×
+                      </RemoveIcon>
+                    </Tag>
+                  )}
+                </SelectedRegionTags>
+
+                <ClearAll
+                  onClick={() => {
+                    setSelectedRegions([]);
+                    setAppliedRegions([]);
+                    setSelectedMinPrice(null);
+                    setSelectedMaxPrice(null);
+                    setTempMinPrice("");
+                    setTempMaxPrice("");
+                    setSelectedMinArea("");
+                    setSelectedMaxArea("");
+                    setTempMinArea("");
+                    setTempMaxArea("");
+                    setBedrooms("");
+                    setAppliedBedrooms(null);
+
+                    setApplyRegionFilter(false);
+                    setApplyPriceFilter(false);
+                    setApplyAreaFilter(false);
+                    setApplyBedroomsFilter(false);
+
+                    setShowAppliedRegionTags(false);
+                    setShowAppliedPriceTag(false);
+                    setShowAppliedAreaTag(false);
+                    setShowAppliedBedroomsTag(false);
+                  }}
+                >
+                  გასუფთავება
+                </ClearAll>
+              </FilterTagsWrapper>
+            )}
+
             {isRegionFilterVisible && (
               <RegionFilterDiv>
                 <LittleHeading>რეგიონის მიხედვით</LittleHeading>
                 <RegionNames>
-                  {regions.map((region, index) => (
+                  {regions.map((region) => (
                     <RegionItem
-                      key={index}
-                      onClick={() => toggleRegion(region)}
+                      key={region.id}
+                      onClick={() => toggleRegion(region.name)}
                     >
                       <HiddenCheckbox
                         type="checkbox"
-                        checked={selectedRegions.includes(region)}
+                        checked={selectedRegions.includes(region.name)}
                         readOnly
                       />
                       <StyledCheckbox
-                        checked={selectedRegions.includes(region)}
+                        checked={selectedRegions.includes(region.name)}
                       />
-                      {region}
+                      {region.name}
                     </RegionItem>
                   ))}
                 </RegionNames>
-                <SelectRegion>არჩევა</SelectRegion>
+                <SelectRegion
+                  onClick={() => {
+                    setAppliedRegions([...selectedRegions]);
+                    setApplyRegionFilter(true);
+                    setIsRegionFilterVisible(false);
+                    setShowAppliedRegionTags(true);
+                  }}
+                >
+                  არჩევა
+                </SelectRegion>
               </RegionFilterDiv>
             )}
+
             {isPriceFilterVisible && (
               <PriceFilterDiv>
                 <PriceHeading>ფასის მიხედვით</PriceHeading>
                 <JustDiv>
                   <MinInputDiv>
-                    <MinInput type="number" placeholder="დან" />
+                    <MinInput
+                      type="number"
+                      value={tempMinPrice}
+                      onChange={(e) => setTempMinPrice(e.target.value)}
+                    />
+
                     <MinPriceLabel>მინ.ფასი</MinPriceLabel>
                     <PriceOptions>
-                      {[
-                        "50,000ლ",
-                        "100,000ლ",
-                        "150,000ლ",
-                        "200,000ლ",
-                        "300,000ლ",
-                      ].map((price, index) => (
-                        <PriceOption
-                          key={index}
-                          onClick={() => setSelectedMinPrice(price)}
-                          selected={selectedMinPrice === price}
-                        >
-                          {price}
-                        </PriceOption>
-                      ))}
+                      {[50000, 100000, 150000, 200000, 300000].map(
+                        (price, index) => (
+                          <PriceOption
+                            key={index}
+                            onClick={() => setTempMinPrice(price)}
+                            selected={Number(tempMinPrice) === price}
+                          >
+                            {price.toLocaleString()}ლ
+                          </PriceOption>
+                        )
+                      )}
                     </PriceOptions>
                   </MinInputDiv>
                   <MaxInputDiv>
-                    <MaxInput type="number" placeholder="მდე" />
+                    <MaxInput
+                      type="number"
+                      value={tempMaxPrice}
+                      onChange={(e) => setTempMaxPrice(e.target.value)}
+                    />
+
                     <MaxPriceLabel>მაქს.ფასი</MaxPriceLabel>
                     <PriceOptionss>
-                      {[
-                        "50,000ლ",
-                        "100,000ლ",
-                        "150,000ლ",
-                        "200,000ლ",
-                        "300,000ლ",
-                      ].map((price, index) => (
-                        <PriceOption
-                          key={index}
-                          onClick={() => setSelectedMaxPrice(price)}
-                          selected={selectedMaxPrice === price}
-                        >
-                          {price}
-                        </PriceOption>
-                      ))}
+                      {[60000, 100000, 150000, 200000, 400000].map(
+                        (price, index) => (
+                          <PriceOption
+                            key={index}
+                            onClick={() => setTempMaxPrice(price)}
+                            selected={Number(tempMaxPrice) === price}
+                          >
+                            {price.toLocaleString()}ლ
+                          </PriceOption>
+                        )
+                      )}
                     </PriceOptionss>
                   </MaxInputDiv>
                 </JustDiv>
-                <ChooseBtn>არჩევა</ChooseBtn>
+                <ChooseBtn
+                  onClick={() => {
+                    const min = cleanValue(tempMinPrice);
+                    const max = cleanValue(tempMaxPrice);
+
+                    if (min && max && min > max) {
+                      setPriceError(" შეიყვანეთ ვალიდური რიცხვები");
+                      return;
+                    }
+
+                    setSelectedMinPrice(tempMinPrice);
+                    setSelectedMaxPrice(tempMaxPrice);
+                    setApplyPriceFilter(true);
+                    setShowAppliedPriceTag(true);
+                    setIsPriceFilterVisible(false);
+                    setPriceError("");
+                  }}
+                >
+                  არჩევა
+                </ChooseBtn>
+                {priceError && <ValidationError>{priceError}</ValidationError>}
               </PriceFilterDiv>
             )}
           </FilterWrapper>
           <ListingContainer>
-            {Array.from({ length: 8 }).map((_, index) => (
-              <ListingCard key={index}>
-                <ImageWrapper>
-                  <TagImgDiv>
-                    <TagImg src="/Tag.svg" alt="Tag" />
-                  </TagImgDiv>
-                  <PropertyImage src="/image.svg" alt="Property" />
-                </ImageWrapper>
-                <Price>80 000ლ</Price>
-                <Location>
-                  <LocIcon src="/LocIcon.svg" alt="Location" /> თბილისი,
-                  ი.ჭავჭავაძის 53
-                </Location>
-                <Details>
-                  <DetailItem>
-                    <Icon src="/bed.svg" alt="Bed" />2
-                  </DetailItem>
-                  <DetailItem>
-                    <Icon src="/Vector.svg" alt="Area" />
-                    55მ2
-                  </DetailItem>
-                  <DetailItem>
-                    <Icon src="/index.svg" alt="Index" />
-                    0160
-                  </DetailItem>
-                </Details>
-              </ListingCard>
-            ))}
+            {applyRegionFilter ||
+            applyPriceFilter ||
+            applyAreaFilter ||
+            applyBedroomsFilter ? (
+              filteredListings.length > 0 ? (
+                filteredListings.slice(0, 8).map((listing) => (
+                  <ListingCard key={listing.id}>
+                    <ImageWrapper>
+                      <TagImgDiv>
+                        <TagLabel>
+                          {listing.is_rental ? "ქირავდება" : "იყიდება"}
+                        </TagLabel>
+                      </TagImgDiv>
+                      <PropertyImage src={listing.image} alt="Property" />
+                    </ImageWrapper>
+                    <Price>{listing.price}ლ</Price>
+                    <Location>
+                      <LocIcon src="/LocIcon.svg" alt="Location" />{" "}
+                      {listing.city.name}, {listing.address}
+                    </Location>
+                    <Details>
+                      <DetailItem>
+                        <Icon src="/bed.svg" alt="Bed" />
+                        {listing.bedrooms}
+                      </DetailItem>
+                      <DetailItem>
+                        <Icon src="/Vector.svg" alt="Area" />
+                        {listing.area}მ²
+                      </DetailItem>
+                      <DetailItem>
+                        <Icon src="/index.svg" alt="Index" />
+                        {listing.zip_code}
+                      </DetailItem>
+                    </Details>
+                  </ListingCard>
+                ))
+              ) : (
+                <NoResultsMessage>შედეგი ვერ მოიძებნა</NoResultsMessage>
+              )
+            ) : null}
           </ListingContainer>
         </div>
       </WholeDiv>
@@ -335,7 +583,7 @@ const FilterSection = styled.section`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 100px auto 80px;
+  margin: 100px auto 20px;
 `;
 
 const FilterOptions = styled.div`
@@ -659,6 +907,7 @@ const ListingContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+  margin-top: 40px;
 `;
 
 const ListingCard = styled.div`
@@ -682,8 +931,14 @@ const TagImgDiv = styled.div`
   z-index: 2;
 `;
 
-const TagImg = styled.img`
-  width: 92px;
+const TagLabel = styled.div`
+  background-color: ${({ children }) =>
+    children === "ქირავდება" ? "#28a745" : "#f93b1d"};
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: bold;
 `;
 
 const PropertyImage = styled.img`
@@ -728,4 +983,57 @@ const DetailItem = styled.div`
 const Icon = styled.img`
   width: 16px;
   height: 16px;
+`;
+
+const SelectedRegionTags = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+`;
+
+const Tag = styled.div`
+  background: #f3f3f3;
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+`;
+
+const RemoveIcon = styled.span`
+  margin-left: 8px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #ff4d4f;
+`;
+const ValidationError = styled.p`
+  color: red;
+  font-size: 14px;
+  margin-top: 10px;
+`;
+const NoResultsMessage = styled.p`
+  font-size: 18px;
+  color: #f93b1d;
+  margin: 50px auto;
+  text-align: center;
+  grid-column: span 4;
+`;
+const FilterTagsWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+`;
+
+const ClearAll = styled.span`
+  cursor: pointer;
+  color: #f93b1d;
+  font-weight: bold;
+  font-size: 14px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: #ffecec;
+  &:hover {
+    background: #ffdbdb;
+  }
 `;
