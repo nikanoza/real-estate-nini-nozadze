@@ -31,12 +31,14 @@ export default function Home() {
 
   const [showAppliedRegionTags, setShowAppliedRegionTags] = useState(false);
   const [showAppliedPriceTag, setShowAppliedPriceTag] = useState(false);
+  const [showAppliedBedroomsTag, setShowAppliedBedroomsTag] = useState(false);
 
   const [showAppliedAreaTag, setShowAppliedAreaTag] = useState(false);
   const [tempMinPrice, setTempMinPrice] = useState("");
   const [tempMaxPrice, setTempMaxPrice] = useState("");
   const [tempMinArea, setTempMinArea] = useState("");
   const [tempMaxArea, setTempMaxArea] = useState("");
+  const [appliedBedrooms, setAppliedBedrooms] = useState(null);
 
   useEffect(() => {
     const fetchRegions = async () => {
@@ -84,7 +86,7 @@ export default function Home() {
         (!selectedMaxArea || listing.area <= cleanValue(selectedMaxArea)));
 
     const matchesBedrooms =
-      !applyBedroomsFilter || listing.bedrooms === Number(bedrooms);
+      !applyBedroomsFilter || listing.bedrooms === Number(appliedBedrooms);
 
     return matchesRegion && matchesPrice && matchesArea && matchesBedrooms;
   });
@@ -260,7 +262,14 @@ export default function Home() {
                       onChange={(e) => setBedrooms(e.target.value)}
                       placeholder=""
                     />
-                    <ChooseButton onClick={() => setApplyBedroomsFilter(true)}>
+                    <ChooseButton
+                      onClick={() => {
+                        setAppliedBedrooms(bedrooms);
+                        setApplyBedroomsFilter(true);
+                        setIsBedroomsFilterVisible(false);
+                        setShowAppliedBedroomsTag(true);
+                      }}
+                    >
                       არჩევა
                     </ChooseButton>
                   </BedroomsFilterDiv>
@@ -320,6 +329,22 @@ export default function Home() {
                       setSelectedMaxArea("");
                       setApplyAreaFilter(false);
                       setShowAppliedAreaTag(false);
+                    }}
+                  >
+                    ×
+                  </RemoveIcon>
+                </Tag>
+              </SelectedRegionTags>
+            )}
+            {showAppliedBedroomsTag && appliedBedrooms && (
+              <SelectedRegionTags>
+                <Tag>
+                  {appliedBedrooms}
+                  <RemoveIcon
+                    onClick={() => {
+                      setAppliedBedrooms(null);
+                      setApplyBedroomsFilter(false);
+                      setShowAppliedBedroomsTag(false);
                     }}
                   >
                     ×
