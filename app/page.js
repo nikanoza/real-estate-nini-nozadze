@@ -35,6 +35,8 @@ export default function Home() {
   const [showAppliedAreaTag, setShowAppliedAreaTag] = useState(false);
   const [tempMinPrice, setTempMinPrice] = useState("");
   const [tempMaxPrice, setTempMaxPrice] = useState("");
+  const [tempMinArea, setTempMinArea] = useState("");
+  const [tempMaxArea, setTempMaxArea] = useState("");
 
   useEffect(() => {
     const fetchRegions = async () => {
@@ -183,57 +185,51 @@ export default function Home() {
                           <StyledInput
                             type="number"
                             placeholder="დან"
-                            value={selectedMinArea}
-                            onChange={(e) => setSelectedMinArea(e.target.value)}
+                            value={tempMinArea}
+                            onChange={(e) => setTempMinArea(e.target.value)}
                           />
                           <Label>მინ.მ²</Label>
                           <Options>
-                            {[
-                              "50,000მ²",
-                              "60,000მ²",
-                              "70,000მ²",
-                              "80,000მ²",
-                              "90,000მ²",
-                            ].map((area, index) => (
-                              <Option
-                                key={index}
-                                onClick={() => setSelectedMinArea(area)}
-                                selected={selectedMinArea === area}
-                              >
-                                {area}
-                              </Option>
-                            ))}
+                            {[50000, 60000, 70000, 80000, 90000].map(
+                              (area, index) => (
+                                <Option
+                                  key={index}
+                                  onClick={() => setTempMinArea(area)}
+                                  selected={Number(tempMinArea) === area}
+                                >
+                                  {area.toLocaleString()}მ²
+                                </Option>
+                              )
+                            )}
                           </Options>
                         </InputContainer>
                         <InputContainer>
                           <StyledInput
                             type="number"
                             placeholder="მდე"
-                            value={selectedMaxArea}
-                            onChange={(e) => setSelectedMaxArea(e.target.value)}
+                            value={tempMaxArea}
+                            onChange={(e) => setTempMaxArea(e.target.value)}
                           />
                           <Label>მაქს.მ²</Label>
                           <Options>
-                            {[
-                              "60,000მ²",
-                              "70,000მ²",
-                              "80,000მ²",
-                              "90,000მ²",
-                              "100,000მ²",
-                            ].map((area, index) => (
-                              <Option
-                                key={index}
-                                onClick={() => setSelectedMaxArea(area)}
-                                selected={selectedMaxArea === area}
-                              >
-                                {area}
-                              </Option>
-                            ))}
+                            {[60000, 70000, 80000, 90000, 100000].map(
+                              (area, index) => (
+                                <Option
+                                  key={index}
+                                  onClick={() => setTempMaxArea(area)}
+                                  selected={Number(tempMaxArea) === area}
+                                >
+                                  {area.toLocaleString()}მ²
+                                </Option>
+                              )
+                            )}
                           </Options>
                         </InputContainer>
                       </InputsWrapper>
                       <ApplyButton
                         onClick={() => {
+                          setSelectedMinArea(tempMinArea);
+                          setSelectedMaxArea(tempMaxArea);
                           setApplyAreaFilter(true);
                           setShowAppliedAreaTag(true);
                           setIsAreaFilterVisible(false);
@@ -314,6 +310,24 @@ export default function Home() {
                 </Tag>
               </SelectedRegionTags>
             )}
+            {showAppliedAreaTag && (selectedMinArea || selectedMaxArea) && (
+              <SelectedRegionTags>
+                <Tag>
+                  {selectedMinArea || "მინ"}მ² - {selectedMaxArea || "მაქს"}მ²
+                  <RemoveIcon
+                    onClick={() => {
+                      setSelectedMinArea("");
+                      setSelectedMaxArea("");
+                      setApplyAreaFilter(false);
+                      setShowAppliedAreaTag(false);
+                    }}
+                  >
+                    ×
+                  </RemoveIcon>
+                </Tag>
+              </SelectedRegionTags>
+            )}
+
             {isRegionFilterVisible && (
               <RegionFilterDiv>
                 <LittleHeading>რეგიონის მიხედვით</LittleHeading>
