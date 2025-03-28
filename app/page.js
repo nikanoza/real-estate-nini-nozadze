@@ -30,6 +30,11 @@ export default function Home() {
   const [applyBedroomsFilter, setApplyBedroomsFilter] = useState(false);
 
   const [showAppliedRegionTags, setShowAppliedRegionTags] = useState(false);
+  const [showAppliedPriceTag, setShowAppliedPriceTag] = useState(false);
+
+  const [showAppliedAreaTag, setShowAppliedAreaTag] = useState(false);
+  const [tempMinPrice, setTempMinPrice] = useState("");
+  const [tempMaxPrice, setTempMaxPrice] = useState("");
 
   useEffect(() => {
     const fetchRegions = async () => {
@@ -56,14 +61,6 @@ export default function Home() {
 
     fetchListings();
   }, []);
-
-  // const hasAnyFilter =
-  //   selectedRegions.length > 0 ||
-  //   selectedMinPrice ||
-  //   selectedMaxPrice ||
-  //   selectedMinArea ||
-  //   selectedMaxArea ||
-  //   bedrooms;
 
   const cleanValue = (val) =>
     typeof val === "string" ? Number(val.replace(/[^0-9.]/g, "")) : Number(val);
@@ -132,6 +129,13 @@ export default function Home() {
       setApplyRegionFilter(false);
       setShowAppliedRegionTags(false);
     }
+  };
+
+  const handleRemoveAreaFilter = () => {
+    setSelectedMinArea("");
+    setSelectedMaxArea("");
+    setApplyAreaFilter(false);
+    setShowAppliedAreaTag(false);
   };
 
   return (
@@ -228,7 +232,13 @@ export default function Home() {
                           </Options>
                         </InputContainer>
                       </InputsWrapper>
-                      <ApplyButton onClick={() => setApplyAreaFilter(true)}>
+                      <ApplyButton
+                        onClick={() => {
+                          setApplyAreaFilter(true);
+                          setShowAppliedAreaTag(true);
+                          setIsAreaFilterVisible(false);
+                        }}
+                      >
                         არჩევა
                       </ApplyButton>
                     </FilterDropdown>
@@ -287,6 +297,23 @@ export default function Home() {
                 ))}
               </SelectedRegionTags>
             )}
+            {showAppliedPriceTag && (selectedMinPrice || selectedMaxPrice) && (
+              <SelectedRegionTags>
+                <Tag>
+                  {selectedMinPrice || "მინ"}₾ - {selectedMaxPrice || "მაქს"}₾
+                  <RemoveIcon
+                    onClick={() => {
+                      setSelectedMinPrice(null);
+                      setSelectedMaxPrice(null);
+                      setApplyPriceFilter(false);
+                      setShowAppliedPriceTag(false);
+                    }}
+                  >
+                    ×
+                  </RemoveIcon>
+                </Tag>
+              </SelectedRegionTags>
+            )}
             {isRegionFilterVisible && (
               <RegionFilterDiv>
                 <LittleHeading>რეგიონის მიხედვით</LittleHeading>
@@ -310,10 +337,10 @@ export default function Home() {
                 </RegionNames>
                 <SelectRegion
                   onClick={() => {
-                    setAppliedRegions([...selectedRegions]); // apply selected ones
-                    setApplyRegionFilter(true); // activate filter
-                    setIsRegionFilterVisible(false); // close filter popup
-                    setShowAppliedRegionTags(true); // show tag UI
+                    setAppliedRegions([...selectedRegions]);
+                    setApplyRegionFilter(true);
+                    setIsRegionFilterVisible(false);
+                    setShowAppliedRegionTags(true);
                   }}
                 >
                   არჩევა
@@ -328,8 +355,8 @@ export default function Home() {
                   <MinInputDiv>
                     <MinInput
                       type="number"
-                      value={selectedMinPrice || ""}
-                      onChange={(e) => setSelectedMinPrice(e.target.value)}
+                      value={tempMinPrice}
+                      onChange={(e) => setTempMinPrice(e.target.value)}
                     />
 
                     <MinPriceLabel>მინ.ფასი</MinPriceLabel>
@@ -338,8 +365,8 @@ export default function Home() {
                         (price, index) => (
                           <PriceOption
                             key={index}
-                            onClick={() => setSelectedMinPrice(price)}
-                            selected={selectedMinPrice === price}
+                            onClick={() => setTempMinPrice(price)}
+                            selected={Number(tempMinPrice) === price}
                           >
                             {price.toLocaleString()}ლ
                           </PriceOption>
@@ -350,8 +377,8 @@ export default function Home() {
                   <MaxInputDiv>
                     <MaxInput
                       type="number"
-                      value={selectedMaxPrice || ""}
-                      onChange={(e) => setSelectedMaxPrice(e.target.value)}
+                      value={tempMaxPrice}
+                      onChange={(e) => setTempMaxPrice(e.target.value)}
                     />
 
                     <MaxPriceLabel>მაქს.ფასი</MaxPriceLabel>
@@ -360,8 +387,8 @@ export default function Home() {
                         (price, index) => (
                           <PriceOption
                             key={index}
-                            onClick={() => setSelectedMaxPrice(price)}
-                            selected={selectedMaxPrice === price}
+                            onClick={() => setTempMaxPrice(price)}
+                            selected={Number(tempMaxPrice) === price}
                           >
                             {price.toLocaleString()}ლ
                           </PriceOption>
@@ -370,7 +397,15 @@ export default function Home() {
                     </PriceOptionss>
                   </MaxInputDiv>
                 </JustDiv>
-                <ChooseBtn onClick={() => setApplyPriceFilter(true)}>
+                <ChooseBtn
+                  onClick={() => {
+                    setSelectedMinPrice(tempMinPrice);
+                    setSelectedMaxPrice(tempMaxPrice);
+                    setApplyPriceFilter(true);
+                    setShowAppliedPriceTag(true);
+                    setIsPriceFilterVisible(false);
+                  }}
+                >
                   არჩევა
                 </ChooseBtn>
               </PriceFilterDiv>
