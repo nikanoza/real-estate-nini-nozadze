@@ -292,7 +292,7 @@ export default function Home() {
               </FilterOptions>
 
               <ButtonGroup>
-                <Link href="/add-listing">
+                <Link style={{ textDecoration: "none" }} href="/add-listing">
                   <PrimaryButton>
                     <WhitePlus src="/whitePlus.svg" alt="Plus" />
                     ლისტინგის დამატება
