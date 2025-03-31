@@ -518,35 +518,41 @@ export default function Home() {
             applyBedroomsFilter ? (
               filteredListings.length > 0 ? (
                 filteredListings.slice(0, 8).map((listing) => (
-                  <ListingCard key={listing.id}>
-                    <ImageWrapper>
-                      <TagImgDiv>
-                        <TagLabel>
-                          {listing.is_rental ? "ქირავდება" : "იყიდება"}
-                        </TagLabel>
-                      </TagImgDiv>
-                      <PropertyImage src={listing.image} alt="Property" />
-                    </ImageWrapper>
-                    <Price>{listing.price}ლ</Price>
-                    <Location>
-                      <LocIcon src="/LocIcon.svg" alt="Location" />{" "}
-                      {listing.city.name}, {listing.address}
-                    </Location>
-                    <Details>
-                      <DetailItem>
-                        <Icon src="/bed.svg" alt="Bed" />
-                        {listing.bedrooms}
-                      </DetailItem>
-                      <DetailItem>
-                        <Icon src="/Vector.svg" alt="Area" />
-                        {listing.area}მ²
-                      </DetailItem>
-                      <DetailItem>
-                        <Icon src="/index.svg" alt="Index" />
-                        {listing.zip_code}
-                      </DetailItem>
-                    </Details>
-                  </ListingCard>
+                  <Link
+                    href={`/listing/${listing.id}`}
+                    key={listing.id}
+                    style={{ textDecoration: "none", color: "grey" }}
+                  >
+                    <ListingCard key={listing.id}>
+                      <ImageWrapper>
+                        <TagImgDiv>
+                          <TagLabel>
+                            {listing.is_rental ? "ქირავდება" : "იყიდება"}
+                          </TagLabel>
+                        </TagImgDiv>
+                        <PropertyImage src={listing.image} alt="Property" />
+                      </ImageWrapper>
+                      <Price>{listing.price}ლ</Price>
+                      <Location>
+                        <LocIcon src="/LocIcon.svg" alt="Location" />{" "}
+                        {listing.city.name}, {listing.address}
+                      </Location>
+                      <Details>
+                        <DetailItem>
+                          <Icon src="/bed.svg" alt="Bed" />
+                          {listing.bedrooms}
+                        </DetailItem>
+                        <DetailItem>
+                          <Icon src="/Vector.svg" alt="Area" />
+                          {listing.area}მ²
+                        </DetailItem>
+                        <DetailItem>
+                          <Icon src="/index.svg" alt="Index" />
+                          {listing.zip_code}
+                        </DetailItem>
+                      </Details>
+                    </ListingCard>
+                  </Link>
                 ))
               ) : (
                 <NoResultsMessage>შედეგი ვერ მოიძებნა</NoResultsMessage>

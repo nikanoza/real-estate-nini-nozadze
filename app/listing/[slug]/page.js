@@ -1,56 +1,84 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import styled from "styled-components";
-import GlobalStyle from "../GlobalStyles";
+import { getListingById } from "@/services/listingService";
+import GlobalStyle from "@/app/GlobalStyles";
+import Link from "next/link";
 
 export default function Listing() {
+  const { slug } = useParams();
+  const [listing, setListing] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchListing = async () => {
+      try {
+        const data = await getListingById(slug);
+        setListing(data);
+      } catch (err) {
+        console.error("Failed to fetch listing:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListing();
+  }, [slug]);
+
+  if (loading) return <p>Loading...</p>;
+  if (!listing) return <p>Listing not found</p>;
   return (
     <>
       <AllComponents>
         <GlobalStyle />
-        <BackArrow src="/leftArrow.svg" />
+        <Link href="/">
+          <BackArrow src="/leftArrow.svg" alt="go back" />
+        </Link>
         <Container>
-          <HomeImg src="/image.svg" />
+          <HomeImg src={listing.image} alt="property" />
           <DetailsSection>
-            <Price>80, 000ლ</Price>
+            <Price>{listing.price}₾</Price>
             <Info>
               <IconText>
                 <AddressImg src="/LocIcon.svg" />
-                თბილისი, ი.ჭავჭავაძის 53
+                {listing.city?.name}, {listing.address}
               </IconText>
               <IconText>
                 <FartobiImg src="/Vector.svg" />
-                ფართი 55მ2
+                ფართი {listing.area}მ²
               </IconText>
               <IconText>
                 <SadzinebeliImg src="/bed.svg" />
-                საძინებელი 2
+                საძინებელი {listing.bedrooms}
               </IconText>
               <IconText>
-                <PostImg src="/index.svg" /> საფოსტო ინდექსი 2552
+                <PostImg src="/index.svg" /> საფოსტო ინდექსი {listing.zip_code}
               </IconText>
             </Info>
-            <AboutHome>
-              იყიდება ბინა ჭავჭავაძის ქუჩაზე, ვაკეში. ბინა არის ახალი რემონტით,
-              ორი საძინებლითა და დიდი აივნებით. მოწყობილია ავეჯიტა და ტექნიკით.
-            </AboutHome>
+            <AboutHome>{listing.description}</AboutHome>
             <AgentCard>
-              <AgentImg src="/agent.svg" />
+              <AgentImg src={listing.agent.avatar} alt="Agent" />
               <AgentInfo>
-                <AgentName>სოფიო გელოვანი</AgentName>
+                <AgentName>
+                  {listing.agent.name} {listing.agent.surname}
+                </AgentName>
                 <Status>აგენტი</Status>
                 <IconText>
                   <MailImg src="/mail.svg" />
-                  sophio.gelovani@redberry.ge
+                  {listing.agent.email}
                 </IconText>
                 <IconText>
                   <MobImg src="/mob.svg" />
-                  577 777 777
+                  {listing.agent.phone}
                 </IconText>
               </AgentInfo>
             </AgentCard>
             <DeleteBtn>ლისტინგის წაშლა</DeleteBtn>
-            <Dates>გამოქვეყნების თარიღი 08/08/24</Dates>
+            <Dates>
+              გამოქვეყნების თარიღი{" "}
+              {new Date(listing.created_at).toLocaleDateString()}
+            </Dates>
           </DetailsSection>
         </Container>
         <SwiperHeading>ბინები მსგავს ლოკაციაზე</SwiperHeading>
