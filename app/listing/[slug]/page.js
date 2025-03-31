@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import styled from "styled-components";
-import { getListingById } from "@/services/listingService";
+import { getListingById, getListings } from "@/services/listingService";
 import GlobalStyle from "@/app/GlobalStyles";
 import Link from "next/link";
 
@@ -10,24 +10,32 @@ export default function Listing() {
   const { slug } = useParams();
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [similarListings, setSimilarListings] = useState([]);
 
   useEffect(() => {
-    const fetchListing = async () => {
+    const fetchListingAndSimilar = async () => {
       try {
         const data = await getListingById(slug);
         setListing(data);
+
+        const allListings = await getListings();
+        const filtered = allListings.filter(
+          (item) => item.id !== data.id && item.city?.id === data.city?.id
+        );
+        setSimilarListings(filtered.slice(0, 4));
       } catch (err) {
-        console.error("Failed to fetch listing:", err);
+        console.error("Failed to fetch listing or similar listings:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchListing();
+    fetchListingAndSimilar();
   }, [slug]);
 
   if (loading) return <p>Loading...</p>;
   if (!listing) return <p>Listing not found</p>;
+
   return (
     <>
       <AllComponents>
@@ -85,34 +93,45 @@ export default function Listing() {
         <SwiperContainer>
           <LeftArrow src="/leftArrow.svg" />
           <PropertiesWrapper>
-            {Array.from({ length: 4 }).map((_, index) => (
-              <PropertyCard key={index}>
-                <ImageContainer>
-                  <BadgeWrapper>
-                    <BadgeIcon src="/Tag.svg" alt="Badge" />
-                  </BadgeWrapper>
-                  <PropertyPic src="/image.svg" alt="Property" />
-                </ImageContainer>
-                <Cost>80 000ლ</Cost>
-                <Address>
-                  <LocationIcon src="/LocIcon.svg" alt="Location" /> თბილისი,
-                  ი.ჭავჭავაძის 53
-                </Address>
-                <Features>
-                  <FeatureItem>
-                    <FeatureIcon src="/bed.svg" alt="Bed" />2
-                  </FeatureItem>
-                  <FeatureItem>
-                    <FeatureIcon src="/Vector.svg" alt="Area" />
-                    55მ2
-                  </FeatureItem>
-                  <FeatureItem>
-                    <FeatureIcon src="/index.svg" alt="Index" />
-                    0160
-                  </FeatureItem>
-                </Features>
-              </PropertyCard>
-            ))}
+            {similarListings.length > 0 ? (
+              similarListings.map((item) => (
+                <Link
+                  key={item.id}
+                  href={`/listing/${item.id}`}
+                  style={{ textDecoration: "none" }}
+                >
+                  <PropertyCard>
+                    <ImageContainer>
+                      <BadgeWrapper>
+                        <BadgeIcon src="/Tag.svg" alt="Badge" />
+                      </BadgeWrapper>
+                      <PropertyPic src={item.image} alt="Property" />
+                    </ImageContainer>
+                    <Cost>{item.price}₾</Cost>
+                    <Address>
+                      <LocationIcon src="/LocIcon.svg" alt="Location" />{" "}
+                      {item.city.name}, {item.address}
+                    </Address>
+                    <Features>
+                      <FeatureItem>
+                        <FeatureIcon src="/bed.svg" alt="Bed" />
+                        {item.bedrooms}
+                      </FeatureItem>
+                      <FeatureItem>
+                        <FeatureIcon src="/Vector.svg" alt="Area" />
+                        {item.area}მ²
+                      </FeatureItem>
+                      <FeatureItem>
+                        <FeatureIcon src="/index.svg" alt="Index" />
+                        {item.zip_code}
+                      </FeatureItem>
+                    </Features>
+                  </PropertyCard>
+                </Link>
+              ))
+            ) : (
+              <p>მსგავსი ბინები ვერ მოიძებნა</p>
+            )}
           </PropertiesWrapper>
           <RightArrow src="/rightArrow.svg" />
         </SwiperContainer>
