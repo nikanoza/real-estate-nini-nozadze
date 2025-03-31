@@ -15,3 +15,7 @@ export const createRealEstateListing = async (listingData) => {
     throw error;
   }
 };
+export const getListings = async () => {
+  const response = await instance.get("/real-estates");
+  return response.data;
+};
