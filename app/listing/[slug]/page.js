@@ -2,7 +2,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import styled from "styled-components";
-import { getListingById, getListings } from "@/services/listingService";
+import {
+  getListingById,
+  getListings,
+  deleteListingById,
+} from "@/services/listingService";
 import GlobalStyle from "@/app/GlobalStyles";
 import Link from "next/link";
 
@@ -49,6 +53,19 @@ export default function Listing() {
 
   if (loading) return <p>Loading...</p>;
   if (!listing) return <p>Listing not found</p>;
+  const handleDelete = async () => {
+    const confirmDelete = window.confirm("ნამდვილად გსურთ ამ ლისტინგის წაშლა?");
+    if (!confirmDelete) return;
+
+    try {
+      await deleteListingById(slug);
+      alert("ლისტინგი წარმატებით წაიშალა!");
+      window.location.href = "/";
+    } catch (err) {
+      console.error("Failed to delete listing:", err);
+      alert("დაფიქსირდა შეცდომა ლისტინგის წაშლისას.");
+    }
+  };
 
   return (
     <>
@@ -96,7 +113,7 @@ export default function Listing() {
                 </IconText>
               </AgentInfo>
             </AgentCard>
-            <DeleteBtn>ლისტინგის წაშლა</DeleteBtn>
+            <DeleteBtn onClick={handleDelete}>ლისტინგის წაშლა</DeleteBtn>
             <Dates>
               გამოქვეყნების თარიღი{" "}
               {new Date(listing.created_at).toLocaleDateString()}

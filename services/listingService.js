@@ -31,3 +31,15 @@ export const getListingById = async (id) => {
     throw error;
   }
 };
+export const deleteListingById = async (id) => {
+  try {
+    const response = await instance.delete(`/real-estates/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Error deleting listing with ID ${id}:`,
+      error.response?.data || error.message
+    );
+    throw error;
+  }
+};
