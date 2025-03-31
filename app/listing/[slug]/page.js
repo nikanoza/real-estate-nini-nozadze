@@ -11,6 +11,19 @@ export default function Listing() {
   const [listing, setListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [similarListings, setSimilarListings] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const ITEMS_PER_PAGE = 4;
+  const handleNext = () => {
+    if (currentIndex + ITEMS_PER_PAGE < similarListings.length) {
+      setCurrentIndex((prev) => prev + ITEMS_PER_PAGE);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentIndex - ITEMS_PER_PAGE >= 0) {
+      setCurrentIndex((prev) => prev - ITEMS_PER_PAGE);
+    }
+  };
 
   useEffect(() => {
     const fetchListingAndSimilar = async () => {
@@ -22,7 +35,8 @@ export default function Listing() {
         const filtered = allListings.filter(
           (item) => item.id !== data.id && item.city?.id === data.city?.id
         );
-        setSimilarListings(filtered.slice(0, 4));
+        setSimilarListings(filtered);
+        setCurrentIndex(0);
       } catch (err) {
         console.error("Failed to fetch listing or similar listings:", err);
       } finally {
@@ -91,49 +105,71 @@ export default function Listing() {
         </Container>
         <SwiperHeading>ბინები მსგავს ლოკაციაზე</SwiperHeading>
         <SwiperContainer>
-          <LeftArrow src="/leftArrow.svg" />
+          <LeftArrow
+            onClick={handlePrev}
+            src="/leftArrow.svg"
+            style={{
+              opacity: currentIndex === 0 ? 0.3 : 1,
+              cursor: currentIndex === 0 ? "default" : "pointer",
+            }}
+          />
           <PropertiesWrapper>
             {similarListings.length > 0 ? (
-              similarListings.map((item) => (
-                <Link
-                  key={item.id}
-                  href={`/listing/${item.id}`}
-                  style={{ textDecoration: "none" }}
-                >
-                  <PropertyCard>
-                    <ImageContainer>
-                      <BadgeWrapper>
-                        <BadgeIcon src="/Tag.svg" alt="Badge" />
-                      </BadgeWrapper>
-                      <PropertyPic src={item.image} alt="Property" />
-                    </ImageContainer>
-                    <Cost>{item.price}₾</Cost>
-                    <Address>
-                      <LocationIcon src="/LocIcon.svg" alt="Location" />{" "}
-                      {item.city.name}, {item.address}
-                    </Address>
-                    <Features>
-                      <FeatureItem>
-                        <FeatureIcon src="/bed.svg" alt="Bed" />
-                        {item.bedrooms}
-                      </FeatureItem>
-                      <FeatureItem>
-                        <FeatureIcon src="/Vector.svg" alt="Area" />
-                        {item.area}მ²
-                      </FeatureItem>
-                      <FeatureItem>
-                        <FeatureIcon src="/index.svg" alt="Index" />
-                        {item.zip_code}
-                      </FeatureItem>
-                    </Features>
-                  </PropertyCard>
-                </Link>
-              ))
+              similarListings
+                .slice(currentIndex, currentIndex + ITEMS_PER_PAGE)
+                .map((item) => (
+                  <Link
+                    key={item.id}
+                    href={`/listing/${item.id}`}
+                    style={{ textDecoration: "none", color: "grey" }}
+                  >
+                    <PropertyCard>
+                      <ImageContainer>
+                        <BadgeWrapper>
+                          <BadgeIcon src="/Tag.svg" alt="Badge" />
+                        </BadgeWrapper>
+                        <PropertyPic src={item.image} alt="Property" />
+                      </ImageContainer>
+                      <Cost>{item.price}₾</Cost>
+                      <Address>
+                        <LocationIcon src="/LocIcon.svg" alt="Location" />{" "}
+                        {item.city.name}, {item.address}
+                      </Address>
+                      <Features>
+                        <FeatureItem>
+                          <FeatureIcon src="/bed.svg" alt="Bed" />
+                          {item.bedrooms}
+                        </FeatureItem>
+                        <FeatureItem>
+                          <FeatureIcon src="/Vector.svg" alt="Area" />
+                          {item.area}მ²
+                        </FeatureItem>
+                        <FeatureItem>
+                          <FeatureIcon src="/index.svg" alt="Index" />
+                          {item.zip_code}
+                        </FeatureItem>
+                      </Features>
+                    </PropertyCard>
+                  </Link>
+                ))
             ) : (
               <p>მსგავსი ბინები ვერ მოიძებნა</p>
             )}
           </PropertiesWrapper>
-          <RightArrow src="/rightArrow.svg" />
+          <RightArrow
+            onClick={handleNext}
+            src="/rightArrow.svg"
+            style={{
+              opacity:
+                currentIndex + ITEMS_PER_PAGE >= similarListings.length
+                  ? 0.3
+                  : 1,
+              cursor:
+                currentIndex + ITEMS_PER_PAGE >= similarListings.length
+                  ? "default"
+                  : "pointer",
+            }}
+          />
         </SwiperContainer>
       </AllComponents>
     </>
