@@ -43,6 +43,8 @@ export default function Home() {
   const [priceError, setPriceError] = useState("");
   const [areaError, setAreaError] = useState("");
 
+  const [randomListings, setRandomListings] = useState([]);
+
   useEffect(() => {
     const fetchRegions = async () => {
       try {
@@ -61,6 +63,8 @@ export default function Home() {
       try {
         const data = await getListings();
         setListings(data);
+        const shuffled = [...data].sort(() => 0.5 - Math.random());
+        setRandomListings(shuffled.slice(0, 8));
       } catch (err) {
         console.error("Failed to fetch listings:", err);
       }
@@ -519,11 +523,11 @@ export default function Home() {
               filteredListings.length > 0 ? (
                 filteredListings.slice(0, 8).map((listing) => (
                   <Link
-                    href={`/listing/${listing.id}`}
                     key={listing.id}
+                    href={`/listing/${listing.id}`}
                     style={{ textDecoration: "none", color: "grey" }}
                   >
-                    <ListingCard key={listing.id}>
+                    <ListingCard>
                       <ImageWrapper>
                         <TagImgDiv>
                           <TagLabel>
@@ -532,9 +536,9 @@ export default function Home() {
                         </TagImgDiv>
                         <PropertyImage src={listing.image} alt="Property" />
                       </ImageWrapper>
-                      <Price>{listing.price}ლ</Price>
+                      <Price>{listing.price}₾</Price>
                       <Location>
-                        <LocIcon src="/LocIcon.svg" alt="Location" />{" "}
+                        <LocIcon src="/LocIcon.svg" alt="Location" />
                         {listing.city.name}, {listing.address}
                       </Location>
                       <Details>
@@ -557,7 +561,45 @@ export default function Home() {
               ) : (
                 <NoResultsMessage>შედეგი ვერ მოიძებნა</NoResultsMessage>
               )
-            ) : null}
+            ) : (
+              randomListings.map((listing) => (
+                <Link
+                  key={listing.id}
+                  href={`/listing/${listing.id}`}
+                  style={{ textDecoration: "none", color: "grey" }}
+                >
+                  <ListingCard>
+                    <ImageWrapper>
+                      <TagImgDiv>
+                        <TagLabel>
+                          {listing.is_rental ? "ქირავდება" : "იყიდება"}
+                        </TagLabel>
+                      </TagImgDiv>
+                      <PropertyImage src={listing.image} alt="Property" />
+                    </ImageWrapper>
+                    <Price>{listing.price}₾</Price>
+                    <Location>
+                      <LocIcon src="/LocIcon.svg" alt="Location" />
+                      {listing.city.name}, {listing.address}
+                    </Location>
+                    <Details>
+                      <DetailItem>
+                        <Icon src="/bed.svg" alt="Bed" />
+                        {listing.bedrooms}
+                      </DetailItem>
+                      <DetailItem>
+                        <Icon src="/Vector.svg" alt="Area" />
+                        {listing.area}მ²
+                      </DetailItem>
+                      <DetailItem>
+                        <Icon src="/index.svg" alt="Index" />
+                        {listing.zip_code}
+                      </DetailItem>
+                    </Details>
+                  </ListingCard>
+                </Link>
+              ))
+            )}
           </ListingContainer>
         </div>
       </WholeDiv>
